@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/JoshPattman/agent"
@@ -67,24 +68,6 @@ type mcpTool struct {
 
 // Call implements agent.Tool.
 func (m *mcpTool) Call(args map[string]any) (string, error) {
-	for key, arg := range args {
-		_, ok := arg.([]any)
-		if ok {
-			continue
-		}
-		argProp, ok := m.tool.InputSchema.Properties[key]
-		if !ok {
-			return "", fmt.Errorf("argument %s not wanted", key)
-		}
-		argPropDict, ok := argProp.(map[string]any)
-		if !ok {
-			continue // Weird format but we will survive
-		}
-		if argPropDict["type"] == "array" {
-			fmt.Println("converted", key, "to array")
-			args[key] = arg
-		}
-	}
 	res, err := m.client.CallTool(context.Background(), mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
 			Name:      m.tool.Name,
@@ -110,9 +93,13 @@ func (m *mcpTool) Call(args map[string]any) (string, error) {
 func (m *mcpTool) Description() []string {
 	desc := []string{m.tool.Description}
 	for pname, prop := range m.tool.InputSchema.Properties {
+		var required string
+		if slices.Contains(m.tool.InputSchema.Required, pname) {
+			required = " [required]"
+		}
 		desc = append(
 			desc,
-			fmt.Sprintf("Param `%s` (%s): %s", pname, prop.(map[string]any)["type"].(string), prop.(map[string]any)["description"].(string)),
+			fmt.Sprintf("Param%s `%s` (%s): %s", required, pname, prop.(map[string]any)["type"].(string), prop.(map[string]any)["description"].(string)),
 		)
 	}
 	return desc
