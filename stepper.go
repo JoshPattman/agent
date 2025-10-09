@@ -1,0 +1,46 @@
+package agent
+
+import (
+	_ "embed"
+
+	"github.com/JoshPattman/jpf"
+)
+
+// Given a state, create the following react step.
+type reActStepper jpf.MapFunc[ExecutingState, ReActResponse]
+
+// Given a state, create the final response.
+type responseStepper jpf.MapFunc[ExecutingState, AnswerResponse]
+
+//go:embed system.gtpl
+var defaultSystemPrompt string
+var defaultReActModePrefix = "You are now in reason-action mode. Your next task / query to respond to is as follows:\n"
+var defaultAnswerModeContent = "You are now in final answer mode, create your final answer."
+
+func newReActStepper(modelBuilder AgentModelBuilder, tools []Tool, systemPrompt string, taskPrefix string, answerModeContent string) reActStepper {
+	return jpf.NewOneShotMapFunc(
+		&stateHistoryMessageEncoder{
+			systemPrompt,
+			taskPrefix,
+			answerModeContent,
+			reActState,
+			tools,
+		},
+		jpf.NewJsonResponseDecoder[ReActResponse](),
+		modelBuilder.BuildAgentModel(ReActResponse{}),
+	)
+}
+
+func newAnswerStepper(modelBuilder AgentModelBuilder, tools []Tool, systemPrompt string, taskPrefix string, answerModeContent string) responseStepper {
+	return jpf.NewOneShotMapFunc(
+		&stateHistoryMessageEncoder{
+			systemPrompt,
+			taskPrefix,
+			answerModeContent,
+			answerState,
+			tools,
+		},
+		jpf.NewJsonResponseDecoder[AnswerResponse](),
+		modelBuilder.BuildAgentModel(AnswerResponse{}),
+	)
+}

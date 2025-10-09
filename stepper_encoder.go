@@ -1,0 +1,123 @@
+package agent
+
+import (
+	"encoding/json"
+
+	"github.com/JoshPattman/jpf"
+)
+
+type agentState uint8
+
+const (
+	reActState agentState = iota
+	answerState
+)
+
+// Encodes the state into messages for the LLM.
+// These messages will look very similar to the messages the LLM generates
+// (however we parsed them and threw away the raw text),
+// BUT they will be perfectly formatted, encoragin the LLM to do the same in the future.
+// Thi can optionally add a message to the end which sets the agent into final answer mode.
+type stateHistoryMessageEncoder struct {
+	systemPrompt           string
+	reactModePrefix        string
+	finalAnswerModeMessage string
+	state                  agentState
+	tools                  []Tool
+}
+
+func (enc *stateHistoryMessageEncoder) BuildInputMessages(state ExecutingState) ([]jpf.Message, error) {
+	messages := make([]jpf.Message, 0)
+	// System prompt
+	sys, err := enc.makeSysMessage()
+	if err != nil {
+		return nil, err
+	}
+	messages = append(messages, sys)
+	// Previous tasks
+	for _, group := range state.History {
+		messages = append(messages, enc.makeBeginTaskMessage(group.Task))
+		messages = append(messages, enc.makeMessagesForReActSteps(group.Steps)...)
+		messages = append(messages, enc.makeAnswerTaskMessage())
+		messages = append(messages, enc.makeTaskAnsweredMessage(group.Response))
+	}
+	// Current task
+	messages = append(messages, enc.makeBeginTaskMessage(state.Active.Task))
+	messages = append(messages, enc.makeMessagesForReActSteps(state.Active.Steps)...)
+	if enc.state == answerState {
+		messages = append(messages, enc.makeAnswerTaskMessage())
+	}
+	return messages, nil
+}
+
+func (enc *stateHistoryMessageEncoder) makeSysMessage() (jpf.Message, error) {
+	sysPrompt, err := formatTemplate(enc.systemPrompt, SystemPromptData{Tools: enc.tools})
+	if err != nil {
+		return jpf.Message{}, err
+	}
+	return jpf.Message{
+		Role:    jpf.UserRole,
+		Content: sysPrompt,
+	}, nil
+}
+
+func (enc *stateHistoryMessageEncoder) makeBeginTaskMessage(task string) jpf.Message {
+	return jpf.Message{
+		Role:    jpf.UserRole,
+		Content: enc.reactModePrefix + task,
+	}
+}
+func (enc *stateHistoryMessageEncoder) makeAnswerTaskMessage() jpf.Message {
+	return jpf.Message{
+		Role:    jpf.UserRole,
+		Content: enc.finalAnswerModeMessage,
+	}
+}
+func (enc *stateHistoryMessageEncoder) makeTaskAnsweredMessage(answer string) jpf.Message {
+	resp := AnswerResponse{
+		Response: answer,
+	}
+	bs, _ := json.Marshal(resp)
+	return jpf.Message{
+		Role:    jpf.AssistantRole,
+		Content: string(bs),
+	}
+}
+
+func (enc *stateHistoryMessageEncoder) makeMessagesForReActSteps(steps []ReActStep) []jpf.Message {
+	messages := make([]jpf.Message, 0)
+	for _, item := range steps {
+		messages = append(
+			messages,
+			jpf.Message{
+				Role:    jpf.AssistantRole,
+				Content: formatStepForAIMessage(item),
+			},
+			jpf.Message{
+				Role:    jpf.UserRole,
+				Content: formatStepForUserMessage(item),
+			},
+		)
+	}
+	return messages
+}
+
+func formatStepForAIMessage(item ReActStep) string {
+	resp := ReActResponse{
+		Reasoning: item.Reasoning,
+	}
+	for _, ao := range item.ActionObservations {
+		resp.Actions = append(resp.Actions, ao.Action)
+	}
+	bs, _ := json.Marshal(resp)
+	return string(bs)
+}
+
+func formatStepForUserMessage(item ReActStep) string {
+	var resps []Observation
+	for _, ao := range item.ActionObservations {
+		resps = append(resps, ao.Observation)
+	}
+	bs, _ := json.Marshal(resps)
+	return string(bs)
+}
