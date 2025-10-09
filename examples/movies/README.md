@@ -2,10 +2,11 @@
 - Run:
   - `export TMDB_KEY=<your tmdb API key> OPENAI_KEY=<your openai key>`
   - `go run .`
-- This agent can use three tools:
+- This agent can use four tools:
   - Get the current date/time
   - Search for movies based on keywords
   - Search for movies based on name
+  - Refer to a poem sub-agent (actually no better at writing poems than the main one, more for demonstration)
 - Example conversation:
 ```
 🤖 Chat started — type 'exit' or 'quit' to end.

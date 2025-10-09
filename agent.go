@@ -7,7 +7,9 @@ import (
 
 func NewAgent(modelBuilder AgentModelBuilder, opts ...AgentOpt) *Agent {
 	params := &agentParams{
-		systemPrompt: defaultSystemPrompt,
+		systemPrompt:       defaultSystemPrompt,
+		taskPrefix:         defaultReActModePrefix,
+		finalAnswerMessage: defaultAnswerModeContent,
 	}
 	for _, o := range opts {
 		o(params)

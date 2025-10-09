@@ -10,15 +10,34 @@ import (
 )
 
 func main() {
+	// Setup models
 	builder := &ModelBuilder{
 		os.Getenv("OPENAI_KEY"),
 		"gpt-4.1",
 	}
+
+	// Setup tools
 	tmdbKey := os.Getenv("TMDB_KEY")
+	tools := []agent.Tool{
+		// This is actually not a specialised agent, but it is here as an example as how we can use subagents as tools.
+		agent.AgentAsTool(
+			agent.NewAgent(builder),
+			"poet",
+			[]string{"Specialised agent for writing poems", "takes one argument - prompt", "you must explicitly ask the poet to write a poem"},
+		),
+		// Three custom tools
+		&timeTool{},
+		&movieLookupTool{tmdbKey},
+		&movieKeywordTool{tmdbKey},
+	}
+
+	// Create primary agent
 	a := agent.NewAgent(
 		builder,
-		agent.WithTools(&timeTool{}, &movieLookupTool{tmdbKey}, &movieKeywordTool{tmdbKey}),
+		agent.WithTools(tools...),
 	)
+
+	// Visual terminal stuff
 	a.SetOnReActCompleteCallback(func(ras agent.ReActStep) {
 		longTextLimit := 100
 		reasoning := ras.Reasoning
@@ -47,7 +66,7 @@ func main() {
 	fmt.Println()
 
 	for {
-		fmt.Print("\033[36mYou:\033[0m ") // Cyan for user input prompt
+		fmt.Print("\033[36mYou:\033[0m ")
 		input, _ := reader.ReadString('\n')
 		input = strings.TrimSpace(input)
 
@@ -63,6 +82,6 @@ func main() {
 		if err != nil {
 			panic(err)
 		}
-		fmt.Printf("\033[32mAgent:\033[0m %s\n\n", answer) // 🟢 Green for agent’s final answer
+		fmt.Printf("\033[32mAgent:\033[0m %s\n\n", answer)
 	}
 }
