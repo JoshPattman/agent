@@ -2,36 +2,34 @@ package agent
 
 import (
 	"bytes"
-	"net/url"
-	"strconv"
+	"fmt"
+	"strings"
 	"text/template"
 )
 
-func parseUrlParamsToArgs(encoded string) (map[string]any, error) {
-	values, err := url.ParseQuery(encoded)
-	if err != nil {
-		return nil, err
-	}
-
+// convertActionArgsToMap converts the new Action.Args structure to map[string]any for tool calls
+func convertActionArgsToMap(args []ActionArg) map[string]any {
 	out := make(map[string]any)
-	for k, v := range values {
-		if len(v) == 0 {
-			continue
-		}
-		s := v[0]
 
-		if b, err := strconv.ParseBool(s); err == nil {
-			out[k] = b
-		} else if i, err := strconv.ParseInt(s, 10, 64); err == nil {
-			out[k] = i
-		} else if f, err := strconv.ParseFloat(s, 64); err == nil {
-			out[k] = f
-		} else {
-			out[k] = s
-		}
+	for _, arg := range args {
+		out[arg.ArgName] = arg.ArgData
 	}
 
-	return out, nil
+	return out
+}
+
+// FormatActionArgsForDisplay formats the new Action.Args structure for display purposes
+func FormatActionArgsForDisplay(args []ActionArg) string {
+	if len(args) == 0 {
+		return ""
+	}
+
+	parts := make([]string, len(args))
+	for i, arg := range args {
+		parts[i] = fmt.Sprintf("%s=%v", arg.ArgName, arg.ArgData)
+	}
+
+	return strings.Join(parts, "&")
 }
 
 func formatTemplate(tpl string, data any) (string, error) {

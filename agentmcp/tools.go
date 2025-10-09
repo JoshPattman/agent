@@ -67,6 +67,24 @@ type mcpTool struct {
 
 // Call implements agent.Tool.
 func (m *mcpTool) Call(args map[string]any) (string, error) {
+	for key, arg := range args {
+		_, ok := arg.([]any)
+		if ok {
+			continue
+		}
+		argProp, ok := m.tool.InputSchema.Properties[key]
+		if !ok {
+			return "", fmt.Errorf("argument %s not wanted", key)
+		}
+		argPropDict, ok := argProp.(map[string]any)
+		if !ok {
+			continue // Weird format but we will survive
+		}
+		if argPropDict["type"] == "array" {
+			fmt.Println("converted", key, "to array")
+			args[key] = arg
+		}
+	}
 	res, err := m.client.CallTool(context.Background(), mcp.CallToolRequest{
 		Params: mcp.CallToolParams{
 			Name:      m.tool.Name,

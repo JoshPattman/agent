@@ -146,16 +146,12 @@ func (a *Agent) observeActions(actions []Action) []ActionObservation {
 			if tool == nil {
 				response = "error: there were no tools available with that name."
 			} else {
-				args, err := parseUrlParamsToArgs(action.UrlEncodedArgs)
+				args := convertActionArgsToMap(action.Args)
+				resp, err := tool.Call(args)
 				if err != nil {
 					response = fmt.Sprintf("error: %s", err.Error())
 				} else {
-					resp, err := tool.Call(args)
-					if err != nil {
-						response = fmt.Sprintf("error: %s", err.Error())
-					} else {
-						response = resp
-					}
+					response = resp
 				}
 			}
 			actionObservations[i] = ActionObservation{

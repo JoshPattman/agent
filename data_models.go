@@ -10,8 +10,12 @@ type AnswerResponse struct {
 }
 
 type Action struct {
-	Name           string `json:"name"`
-	UrlEncodedArgs string `json:"url_encoded_args"`
+	Name string      `json:"name"`
+	Args []ActionArg `json:"args"`
+}
+type ActionArg struct {
+	ArgName string `json:"arg_name"`
+	ArgData any    `json:"arg_data"`
 }
 
 type Observation struct {

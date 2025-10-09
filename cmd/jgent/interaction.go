@@ -21,9 +21,10 @@ func interactionLoop(a *agent.Agent) {
 		fmt.Printf("	\033[33m%s\033[0m\n", reasoning)
 
 		for _, actionObservation := range ras.ActionObservations {
+			argsStr := agent.FormatActionArgsForDisplay(actionObservation.Action.Args)
 			fmt.Printf("	$ \033[34mtool://%s?%s\033[0m\n",
 				actionObservation.Action.Name,
-				actionObservation.Action.UrlEncodedArgs,
+				argsStr,
 			)
 			obs := actionObservation.Observation.Observed
 			if len(obs) > longTextLimit {
