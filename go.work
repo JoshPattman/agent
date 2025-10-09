@@ -4,5 +4,4 @@ use (
 	.
 	./agentmcp
 	./cmd/jgent
-	./examples/movies
 )
