@@ -2,7 +2,9 @@ package agentmcp
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/JoshPattman/agent"
 	"github.com/mark3labs/mcp-go/client"
@@ -71,7 +73,16 @@ func (m *mcpTool) Call(args map[string]any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return res.Content[0].(mcp.TextContent).Text, nil
+	contents := make([]string, 0)
+	for _, c := range res.Content {
+		if c, ok := c.(mcp.TextContent); ok {
+			contents = append(contents, c.Text)
+		}
+	}
+	if len(contents) == 0 {
+		return "", errors.New("tool returned no content")
+	}
+	return strings.Join(contents, "\n\n\n"), nil
 }
 
 // Description implements agent.Tool.
