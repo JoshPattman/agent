@@ -9,34 +9,7 @@ import (
 	"github.com/JoshPattman/agent"
 )
 
-func main() {
-	// Setup models
-	builder := &ModelBuilder{
-		os.Getenv("OPENAI_KEY"),
-		"gpt-4.1",
-	}
-
-	// Setup tools
-	tmdbKey := os.Getenv("TMDB_KEY")
-	tools := []agent.Tool{
-		// This is actually not a specialised agent, but it is here as an example as how we can use subagents as tools.
-		agent.AgentAsTool(
-			agent.NewAgent(builder),
-			"poet",
-			[]string{"Specialised agent for writing poems", "takes one argument - prompt", "you must explicitly ask the poet to write a poem"},
-		),
-		// Three custom tools
-		&timeTool{},
-		&movieLookupTool{tmdbKey},
-		&movieKeywordTool{tmdbKey},
-	}
-
-	// Create primary agent
-	a := agent.NewAgent(
-		builder,
-		agent.WithTools(tools...),
-	)
-
+func interactionLoop(a *agent.Agent) {
 	// Visual terminal stuff
 	a.SetOnReActCompleteCallback(func(ras agent.ReActStep) {
 		longTextLimit := 100

@@ -96,7 +96,6 @@ The model builder is responsible for:
 - Handling the actual API calls to your chosen language model
 - Managing conversation context and tool descriptions
 
-See `examples/movies/modelbuilder.go` for a complete implementation using OpenAI's API.
 
 ## Callbacks
 

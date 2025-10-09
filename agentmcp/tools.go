@@ -13,8 +13,11 @@ import (
 )
 
 // Create an MCP HTTP client and initialise it
-func CreateClient(addr string) (*client.Client, error) {
-	httpTransport, err := transport.NewStreamableHTTP(addr)
+func CreateClient(addr string, customHeaders map[string]string) (*client.Client, error) {
+	httpTransport, err := transport.NewStreamableHTTP(
+		addr,
+		transport.WithHTTPHeaders(customHeaders),
+	)
 	if err != nil {
 		return nil, err
 	}

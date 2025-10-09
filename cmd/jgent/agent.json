@@ -1,0 +1,8 @@
+{
+    "model_name": "gpt-4.1",
+    "mcp_servers": [
+        {
+            "addr": "http://localhost:1234/mcp"
+        }
+    ]
+}

@@ -3,5 +3,6 @@ go 1.23.1
 use (
 	.
 	./agentmcp
+	./cmd/jgent
 	./examples/movies
 )
