@@ -25,16 +25,16 @@ func main() {
 	}
 
 	// Build the agent
-	a, err := BuildAgent(modelsConf, agentConf)
+	ab, err := BuildAgentBuilder(modelsConf, agentConf)
 	if err != nil {
 		panic(err)
 	}
 
 	// Interact
-	interactionLoop(a)
+	interactionLoop(ab())
 }
 
-func BuildAgent(modelsConf ModelsConfig, agentConf AgentConfig) (*agent.Agent, error) {
+func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig) (func() *agent.Agent, error) {
 	// Get model builder
 	model, ok := modelsConf.Models[agentConf.ModelName]
 	if !ok {
@@ -45,7 +45,8 @@ func BuildAgent(modelsConf ModelsConfig, agentConf AgentConfig) (*agent.Agent, e
 		model.Name,
 		model.URL,
 	}
-	// Create tools
+
+	// Create MCPtools
 	tools := make([]agent.Tool, 0)
 	for _, server := range agentConf.MCPServers {
 		client, err := agentmcp.CreateClient(server.Addr, server.Headers)
@@ -58,7 +59,22 @@ func BuildAgent(modelsConf ModelsConfig, agentConf AgentConfig) (*agent.Agent, e
 		}
 		tools = append(tools, clientTools...)
 	}
+
+	// Create built-in tools
 	tools = append(tools, &timeTool{})
+
+	// Create agent-as-tool tools
+	for _, ac := range agentConf.SubAgents {
+		ab, err := BuildAgentBuilder(modelsConf, ac)
+		if err != nil {
+			return nil, err
+		}
+		tools = append(tools, agent.AgentAsTool(ab, ac.AgentName, ac.AgentDescription))
+	}
+
 	// Build agent
-	return agent.NewAgent(modelBuilder, agent.WithTools(tools...)), nil
+	ab := func() *agent.Agent {
+		return agent.NewAgent(modelBuilder, agent.WithTools(tools...))
+	}
+	return ab, nil
 }

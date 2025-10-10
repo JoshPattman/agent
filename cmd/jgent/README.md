@@ -1,6 +1,8 @@
 # jgent
 
 A command line tool for interacting with AI agents configured via JSON files.
+- Attach MCP tools (text-tools only)
+- Create sub agents recursively
 
 ## Usage
 
@@ -21,6 +23,8 @@ Configure the agent's model and MCP servers:
 
 ```json
 {
+    "agent_name": "josh's agent",
+    "agent_description": ["a general purpose high-level agent"],
     "model_name": "gpt-4.1",
     "mcp_servers": [
         {
@@ -29,6 +33,9 @@ Configure the agent's model and MCP servers:
                 "Authorization": "Bearer your-token"
             }
         }
+    ],
+    "sub_agents": [
+        <recursive>
     ]
 }
 ```

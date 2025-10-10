@@ -73,14 +73,14 @@ func (f *functionalTool) Name() string {
 	return f.name
 }
 
-func AgentAsTool(agent *Agent, name string, description []string) Tool {
-	return &agentAsTool{agent, name, description}
+func AgentAsTool(buildAgent func() *Agent, name string, description []string) Tool {
+	return &agentAsTool{buildAgent, name, description}
 }
 
 type agentAsTool struct {
-	agent *Agent
-	name  string
-	desc  []string
+	buildAgent func() *Agent
+	name       string
+	desc       []string
 }
 
 // Call implements Tool.
@@ -90,7 +90,7 @@ func (a *agentAsTool) Call(args map[string]any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return a.agent.Answer(buf.String())
+	return a.buildAgent().Answer(buf.String())
 }
 
 // Description implements Tool.
