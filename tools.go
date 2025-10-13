@@ -73,12 +73,12 @@ func (f *functionalTool) Name() string {
 	return f.name
 }
 
-func AgentAsTool(buildAgent func() *Agent, name string, description []string) Tool {
+func AgentAsTool(buildAgent func() Agent, name string, description []string) Tool {
 	return &agentAsTool{buildAgent, name, description}
 }
 
 type agentAsTool struct {
-	buildAgent func() *Agent
+	buildAgent func() Agent
 	name       string
 	desc       []string
 }

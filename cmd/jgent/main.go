@@ -34,7 +34,7 @@ func main() {
 	interactionLoop(ab())
 }
 
-func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig) (func() *agent.Agent, error) {
+func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig) (func() agent.Agent, error) {
 	// Get model builder
 	model, ok := modelsConf.Models[agentConf.ModelName]
 	if !ok {
@@ -73,8 +73,8 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig) (func() *
 	}
 
 	// Build agent
-	ab := func() *agent.Agent {
-		return agent.NewAgent(modelBuilder, agent.WithTools(tools...))
+	ab := func() agent.Agent {
+		return agent.NewCombinedReActAgent(modelBuilder, agent.WithTools(tools...))
 	}
 	return ab, nil
 }

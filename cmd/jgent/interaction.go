@@ -9,18 +9,17 @@ import (
 	"github.com/JoshPattman/agent"
 )
 
-func interactionLoop(a *agent.Agent) {
+func interactionLoop(a agent.Agent) {
 	// Visual terminal stuff
-	a.SetOnReActCompleteCallback(func(ras agent.ReActStep) {
+	a.SetOnReActCompleteCallback(func(reasoning string, actionObs []agent.ActionObservation) {
 		longTextLimit := 100
-		reasoning := ras.Reasoning
 		if len(reasoning) > longTextLimit {
 			reasoning = reasoning[:longTextLimit-3] + "..."
 		}
 		reasoning = strings.ReplaceAll(reasoning, "\n", " ")
 		fmt.Printf("	\033[33m%s\033[0m\n", reasoning)
 
-		for _, actionObservation := range ras.ActionObservations {
+		for _, actionObservation := range actionObs {
 			argsStr := agent.FormatActionArgsForDisplay(actionObservation.Action.Args)
 			fmt.Printf("	$ \033[34mtool://%s?%s\033[0m\n",
 				actionObservation.Action.Name,
