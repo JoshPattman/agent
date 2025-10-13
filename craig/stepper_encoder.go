@@ -1,8 +1,9 @@
-package agent
+package craig
 
 import (
 	"encoding/json"
 
+	"github.com/JoshPattman/agent"
 	"github.com/JoshPattman/jpf"
 )
 
@@ -23,7 +24,7 @@ type stateHistoryMessageEncoder struct {
 	reactModePrefix        string
 	finalAnswerModeMessage string
 	state                  agentState
-	tools                  []Tool
+	tools                  []agent.Tool
 }
 
 func (enc *stateHistoryMessageEncoder) BuildInputMessages(state ExecutingState) ([]jpf.Message, error) {
@@ -114,7 +115,7 @@ func formatStepForAIMessage(item ReActStep) string {
 }
 
 func formatStepForUserMessage(item ReActStep) string {
-	var resps []Observation
+	var resps []agent.Observation
 	for _, ao := range item.ActionObservations {
 		resps = append(resps, ao.Observation)
 	}

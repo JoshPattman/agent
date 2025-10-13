@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/JoshPattman/agent"
+	"github.com/JoshPattman/agent/craig"
 )
 
 func interactionLoop(a agent.Agent) {
@@ -20,7 +21,7 @@ func interactionLoop(a agent.Agent) {
 		fmt.Printf("	\033[33m%s\033[0m\n", reasoning)
 
 		for _, actionObservation := range actionObs {
-			argsStr := agent.FormatActionArgsForDisplay(actionObservation.Action.Args)
+			argsStr := craig.FormatActionArgsForDisplay(actionObservation.Action.Args)
 			fmt.Printf("	$ \033[34mtool://%s?%s\033[0m\n",
 				actionObservation.Action.Name,
 				argsStr,

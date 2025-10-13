@@ -3,6 +3,8 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"slices"
 
 	"github.com/JoshPattman/jpf"
@@ -101,4 +103,137 @@ func (a *agentAsTool) Description() []string {
 // Name implements Tool.
 func (a *agentAsTool) Name() string {
 	return a.name
+}
+
+type SubAgentConstructor struct {
+	Build func() Agent
+	Desc  string
+}
+
+func CreateSubAgentTools(agentStorage map[string]Agent, createFuncs map[string]SubAgentConstructor) (Tool, Tool) {
+	createTool := &createSubagentTool{
+		existingAgents: agentStorage,
+		agentFuncs:     createFuncs,
+	}
+	callTool := &continueSubagentTool{
+		existingAgents: agentStorage,
+	}
+	return createTool, callTool
+}
+
+type createSubagentTool struct {
+	existingAgents map[string]Agent
+	agentFuncs     map[string]SubAgentConstructor
+}
+
+func (t *createSubagentTool) Name() string {
+	return "create_subagent"
+}
+
+func (t *createSubagentTool) Description() []string {
+	s := []string{
+		"Create a new subagent of the given type.",
+		"You may create as many agents (of the same or different types) as you wish.",
+		"You must provide an `agent_type` string, and an `initial_query` string.",
+		"Allowed types are:",
+	}
+	for key, af := range t.agentFuncs {
+		s = append(s, fmt.Sprintf("`%s`: %s", key, af.Desc))
+	}
+	return s
+}
+
+func (t *createSubagentTool) Call(args map[string]any) (string, error) {
+	// Extract and validate arguments
+	agentTypeRaw, ok := args["agent_type"]
+	if !ok {
+		return "", fmt.Errorf("missing required argument: agent_type")
+	}
+	agentType, ok := agentTypeRaw.(string)
+	if !ok {
+		return "", fmt.Errorf("agent_type must be a string")
+	}
+	initialQueryRaw, ok := args["initial_query"]
+	if !ok {
+		return "", fmt.Errorf("missing required argument: initial_query")
+	}
+	initialQuery, ok := initialQueryRaw.(string)
+	if !ok {
+		return "", fmt.Errorf("initial_query must be a string")
+	}
+
+	// Find subagent constructor
+	constructor, ok := t.agentFuncs[agentType]
+	if !ok {
+		return "", fmt.Errorf("unknown agent_type: %s", agentType)
+	}
+
+	// Build the subagent
+	subagent := constructor.Build()
+
+	// Answer the initial query
+	answer, err := subagent.Answer(initialQuery)
+	if err != nil {
+		return "", err
+	}
+
+	key := randKey()
+	t.existingAgents[key] = subagent
+
+	return fmt.Sprintf("Created subagent with conversation key '%s'. It responded:\n\n%s", key, answer), nil
+}
+
+func randKey() string {
+	alph := "abcdefghijklmnopqrstuvwxyz"
+	s := []byte{}
+	for range 10 {
+		s = append(s, alph[rand.Intn(len(alph))])
+	}
+	return string(s)
+}
+
+type continueSubagentTool struct {
+	existingAgents map[string]Agent
+}
+
+func (t *continueSubagentTool) Name() string {
+	return "continue_subagent"
+}
+
+func (t *continueSubagentTool) Description() []string {
+	return []string{
+		"Continue a conversation with an existing subagent.",
+		"Provide 'conversation_id' (string) and 'follow_up_query' (string).",
+	}
+}
+
+func (t *continueSubagentTool) Call(args map[string]any) (string, error) {
+	conversationIDRaw, ok := args["conversation_id"]
+	if !ok {
+		return "", fmt.Errorf("missing required argument: conversation_id")
+	}
+	conversationID, ok := conversationIDRaw.(string)
+	if !ok {
+		return "", fmt.Errorf("conversation_id must be a string")
+	}
+	followUpQueryRaw, ok := args["follow_up_query"]
+	if !ok {
+		return "", fmt.Errorf("missing required argument: follow_up_query")
+	}
+	followUpQuery, ok := followUpQueryRaw.(string)
+	if !ok {
+		return "", fmt.Errorf("follow_up_query must be a string")
+	}
+
+	subagent, ok := t.existingAgents[conversationID]
+	if !ok {
+		return "", fmt.Errorf("no subagent found for conversation_id: %s", conversationID)
+	}
+
+	answer, err := subagent.Answer(followUpQuery)
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("Subagent '%s' responded:\n\n%s", conversationID, answer), nil
 }

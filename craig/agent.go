@@ -1,11 +1,14 @@
-package agent
+// craig implements a Combined ReAct Intelligent aGent, where the agent reasons and acts in a single message.
+package craig
 
 import (
 	"fmt"
 	"sync"
+
+	"github.com/JoshPattman/agent"
 )
 
-func NewCombinedReActAgent(modelBuilder AgentModelBuilder, opts ...CombinedReActAgentOpt) Agent {
+func NewCombinedReActAgent(modelBuilder agent.AgentModelBuilder, opts ...CombinedReActAgentOpt) agent.Agent {
 	params := &agentParams{
 		systemPrompt:       defaultSystemPrompt,
 		taskPrefix:         defaultReActModePrefix,
@@ -37,7 +40,7 @@ type agentParams struct {
 	systemPrompt       string
 	taskPrefix         string
 	finalAnswerMessage string
-	tools              []Tool
+	tools              []agent.Tool
 }
 
 type CombinedReActAgentOpt func(*agentParams)
@@ -48,7 +51,7 @@ func WithSystemPromptTemplate(tpl string) CombinedReActAgentOpt {
 	}
 }
 
-func WithTools(tools ...Tool) CombinedReActAgentOpt {
+func WithTools(tools ...agent.Tool) CombinedReActAgentOpt {
 	return func(a *agentParams) {
 		a.tools = append(a.tools, tools...)
 	}
@@ -70,9 +73,9 @@ type combineReActAgent struct {
 	history         []ExecutedTask
 	reActStepper    reActStepper
 	answerStepper   responseStepper
-	tools           []Tool
-	onReActInit     func(string, []Action)
-	onReActComplete func(string, []ActionObservation)
+	tools           []agent.Tool
+	onReActInit     func(string, []agent.Action)
+	onReActComplete func(string, []agent.ActionObservation)
 }
 
 func (a *combineReActAgent) Answer(query string) (string, error) {
@@ -101,10 +104,10 @@ func (a *combineReActAgent) Answer(query string) (string, error) {
 	return finalResponse.Response, nil
 }
 
-func (a *combineReActAgent) SetOnReActInitCallback(callback func(reasoning string, actions []Action)) {
+func (a *combineReActAgent) SetOnReActInitCallback(callback func(reasoning string, actions []agent.Action)) {
 	a.onReActInit = callback
 }
-func (a *combineReActAgent) SetOnReActCompleteCallback(callback func(reasoning string, actionObs []ActionObservation)) {
+func (a *combineReActAgent) SetOnReActCompleteCallback(callback func(reasoning string, actionObs []agent.ActionObservation)) {
 	a.onReActComplete = callback
 }
 
@@ -132,14 +135,14 @@ func (a *combineReActAgent) stepTaskState(state ExecutingState) (ExecutingState,
 	}
 }
 
-func (a *combineReActAgent) observeActions(actions []Action) []ActionObservation {
-	actionObservations := make([]ActionObservation, len(actions))
+func (a *combineReActAgent) observeActions(actions []agent.Action) []agent.ActionObservation {
+	actionObservations := make([]agent.ActionObservation, len(actions))
 	wg := &sync.WaitGroup{}
 	wg.Add(len(actions))
 	for i, action := range actions {
-		go func(i int, action Action) {
+		go func(i int, action agent.Action) {
 			defer wg.Done()
-			var tool Tool
+			var tool agent.Tool
 			for _, t := range a.tools {
 				if t.Name() == action.Name {
 					tool = t
@@ -158,9 +161,9 @@ func (a *combineReActAgent) observeActions(actions []Action) []ActionObservation
 					response = resp
 				}
 			}
-			actionObservations[i] = ActionObservation{
+			actionObservations[i] = agent.ActionObservation{
 				Action: action,
-				Observation: Observation{
+				Observation: agent.Observation{
 					Observed: response,
 				},
 			}

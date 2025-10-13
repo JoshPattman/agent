@@ -6,6 +6,7 @@ import (
 
 	"github.com/JoshPattman/agent"
 	"github.com/JoshPattman/agent/agentmcp"
+	"github.com/JoshPattman/agent/craig"
 )
 
 func main() {
@@ -74,7 +75,7 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig) (func() a
 
 	// Build agent
 	ab := func() agent.Agent {
-		return agent.NewCombinedReActAgent(modelBuilder, agent.WithTools(tools...))
+		return craig.NewCombinedReActAgent(modelBuilder, craig.WithTools(tools...))
 	}
 	return ab, nil
 }

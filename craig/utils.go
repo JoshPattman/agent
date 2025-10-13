@@ -1,14 +1,16 @@
-package agent
+package craig
 
 import (
 	"bytes"
 	"fmt"
+	"html/template"
 	"strings"
-	"text/template"
+
+	"github.com/JoshPattman/agent"
 )
 
 // convertActionArgsToMap converts the new Action.Args structure to map[string]any for tool calls
-func convertActionArgsToMap(args []ActionArg) map[string]any {
+func convertActionArgsToMap(args []agent.ActionArg) map[string]any {
 	out := make(map[string]any)
 
 	for _, arg := range args {
@@ -19,7 +21,7 @@ func convertActionArgsToMap(args []ActionArg) map[string]any {
 }
 
 // FormatActionArgsForDisplay formats the new Action.Args structure for display purposes
-func FormatActionArgsForDisplay(args []ActionArg) string {
+func FormatActionArgsForDisplay(args []agent.ActionArg) string {
 	if len(args) == 0 {
 		return ""
 	}
