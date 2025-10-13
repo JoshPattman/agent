@@ -27,7 +27,7 @@ type stateHistoryMessageEncoder struct {
 	tools                  []agent.Tool
 }
 
-func (enc *stateHistoryMessageEncoder) BuildInputMessages(state ExecutingState) ([]jpf.Message, error) {
+func (enc *stateHistoryMessageEncoder) BuildInputMessages(state executingState) ([]jpf.Message, error) {
 	messages := make([]jpf.Message, 0)
 	// System prompt
 	sys, err := enc.makeSysMessage()
@@ -52,7 +52,7 @@ func (enc *stateHistoryMessageEncoder) BuildInputMessages(state ExecutingState) 
 }
 
 func (enc *stateHistoryMessageEncoder) makeSysMessage() (jpf.Message, error) {
-	sysPrompt, err := formatTemplate(enc.systemPrompt, SystemPromptData{Tools: enc.tools})
+	sysPrompt, err := formatTemplate(enc.systemPrompt, systemPromptData{Tools: enc.tools})
 	if err != nil {
 		return jpf.Message{}, err
 	}
@@ -75,7 +75,7 @@ func (enc *stateHistoryMessageEncoder) makeAnswerTaskMessage() jpf.Message {
 	}
 }
 func (enc *stateHistoryMessageEncoder) makeTaskAnsweredMessage(answer string) jpf.Message {
-	resp := AnswerResponse{
+	resp := answerResponse{
 		Response: answer,
 	}
 	bs, _ := json.Marshal(resp)
@@ -85,7 +85,7 @@ func (enc *stateHistoryMessageEncoder) makeTaskAnsweredMessage(answer string) jp
 	}
 }
 
-func (enc *stateHistoryMessageEncoder) makeMessagesForReActSteps(steps []ReActStep) []jpf.Message {
+func (enc *stateHistoryMessageEncoder) makeMessagesForReActSteps(steps []reActStep) []jpf.Message {
 	messages := make([]jpf.Message, 0)
 	for _, item := range steps {
 		messages = append(
@@ -103,8 +103,8 @@ func (enc *stateHistoryMessageEncoder) makeMessagesForReActSteps(steps []ReActSt
 	return messages
 }
 
-func formatStepForAIMessage(item ReActStep) string {
-	resp := ReActResponse{
+func formatStepForAIMessage(item reActStep) string {
+	resp := reActResponse{
 		Reasoning: item.Reasoning,
 	}
 	for _, ao := range item.ActionObservations {
@@ -114,7 +114,7 @@ func formatStepForAIMessage(item ReActStep) string {
 	return string(bs)
 }
 
-func formatStepForUserMessage(item ReActStep) string {
+func formatStepForUserMessage(item reActStep) string {
 	var resps []agent.Observation
 	for _, ao := range item.ActionObservations {
 		resps = append(resps, ao.Observation)

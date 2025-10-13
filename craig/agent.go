@@ -8,7 +8,7 @@ import (
 	"github.com/JoshPattman/agent"
 )
 
-func NewCombinedReActAgent(modelBuilder agent.AgentModelBuilder, opts ...CombinedReActAgentOpt) agent.Agent {
+func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 	params := &agentParams{
 		systemPrompt:       defaultSystemPrompt,
 		taskPrefix:         defaultReActModePrefix,
@@ -43,34 +43,34 @@ type agentParams struct {
 	tools              []agent.Tool
 }
 
-type CombinedReActAgentOpt func(*agentParams)
+type NewOpt func(*agentParams)
 
-func WithSystemPromptTemplate(tpl string) CombinedReActAgentOpt {
+func WithSystemPromptTemplate(tpl string) NewOpt {
 	return func(a *agentParams) {
 		a.systemPrompt = tpl
 	}
 }
 
-func WithTools(tools ...agent.Tool) CombinedReActAgentOpt {
+func WithTools(tools ...agent.Tool) NewOpt {
 	return func(a *agentParams) {
 		a.tools = append(a.tools, tools...)
 	}
 }
 
-func WithTaskPrefix(prefix string) CombinedReActAgentOpt {
+func WithTaskPrefix(prefix string) NewOpt {
 	return func(a *agentParams) {
 		a.taskPrefix = prefix
 	}
 }
 
-func WithFinalAnswerMessage(msg string) CombinedReActAgentOpt {
+func WithFinalAnswerMessage(msg string) NewOpt {
 	return func(a *agentParams) {
 		a.finalAnswerMessage = msg
 	}
 }
 
 type combineReActAgent struct {
-	history         []ExecutedTask
+	history         []executedTask
 	reActStepper    reActStepper
 	answerStepper   responseStepper
 	tools           []agent.Tool
@@ -96,7 +96,7 @@ func (a *combineReActAgent) Answer(query string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	a.history = append(a.history, ExecutedTask{
+	a.history = append(a.history, executedTask{
 		Task:     query,
 		Steps:    state.Active.Steps,
 		Response: finalResponse.Response,
@@ -111,16 +111,16 @@ func (a *combineReActAgent) SetOnReActCompleteCallback(callback func(reasoning s
 	a.onReActComplete = callback
 }
 
-func (a *combineReActAgent) stepTaskState(state ExecutingState) (ExecutingState, bool, error) {
+func (a *combineReActAgent) stepTaskState(state executingState) (executingState, bool, error) {
 	resp, _, err := a.reActStepper.Call(state)
 	if err != nil {
-		return ExecutingState{}, false, err
+		return executingState{}, false, err
 	}
 	if a.onReActInit != nil {
 		a.onReActInit(resp.Reasoning, resp.Actions)
 	}
 	actionObservations := a.observeActions(resp.Actions)
-	step := ReActStep{
+	step := reActStep{
 		Reasoning:          resp.Reasoning,
 		ActionObservations: actionObservations,
 	}
@@ -173,10 +173,10 @@ func (a *combineReActAgent) observeActions(actions []agent.Action) []agent.Actio
 	return actionObservations
 }
 
-func newTaskState(query string, history []ExecutedTask) ExecutingState {
-	return ExecutingState{
+func newTaskState(query string, history []executedTask) executingState {
+	return executingState{
 		History: history,
-		Active: ExecutingTask{
+		Active: executingTask{
 			Task: query,
 		},
 	}

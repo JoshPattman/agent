@@ -2,36 +2,36 @@ package craig
 
 import "github.com/JoshPattman/agent"
 
-type ReActResponse struct {
+type reActResponse struct {
 	Reasoning string         `json:"reasoning"`
 	Actions   []agent.Action `json:"actions"`
 }
 
-type AnswerResponse struct {
+type answerResponse struct {
 	Response string `json:"response"`
 }
 
-type ReActStep struct {
+type reActStep struct {
 	Reasoning          string                    `json:"reasoning"`
 	ActionObservations []agent.ActionObservation `json:"action_observations"`
 }
 
-type ExecutedTask struct {
+type executedTask struct {
 	Task     string      `json:"task"`
-	Steps    []ReActStep `json:"steps"`
+	Steps    []reActStep `json:"steps"`
 	Response string      `json:"response"`
 }
 
-type ExecutingTask struct {
+type executingTask struct {
 	Task  string      `json:"task"`
-	Steps []ReActStep `json:"steps"`
+	Steps []reActStep `json:"steps"`
 }
 
-type ExecutingState struct {
-	History []ExecutedTask
-	Active  ExecutingTask
+type executingState struct {
+	History []executedTask
+	Active  executingTask
 }
 
-type SystemPromptData struct {
+type systemPromptData struct {
 	Tools []agent.Tool
 }

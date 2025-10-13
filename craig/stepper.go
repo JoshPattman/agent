@@ -8,10 +8,10 @@ import (
 )
 
 // Given a state, create the following react step.
-type reActStepper jpf.MapFunc[ExecutingState, ReActResponse]
+type reActStepper jpf.MapFunc[executingState, reActResponse]
 
 // Given a state, create the final response.
-type responseStepper jpf.MapFunc[ExecutingState, AnswerResponse]
+type responseStepper jpf.MapFunc[executingState, answerResponse]
 
 //go:embed system.gtpl
 var defaultSystemPrompt string
@@ -27,8 +27,8 @@ func newReActStepper(modelBuilder agent.AgentModelBuilder, tools []agent.Tool, s
 			reActState,
 			tools,
 		},
-		jpf.NewJsonResponseDecoder[ReActResponse](),
-		modelBuilder.BuildAgentModel(ReActResponse{}),
+		jpf.NewJsonResponseDecoder[reActResponse](),
+		modelBuilder.BuildAgentModel(reActResponse{}),
 	)
 }
 
@@ -41,7 +41,7 @@ func newAnswerStepper(modelBuilder agent.AgentModelBuilder, tools []agent.Tool, 
 			answerState,
 			tools,
 		},
-		jpf.NewJsonResponseDecoder[AnswerResponse](),
-		modelBuilder.BuildAgentModel(AnswerResponse{}),
+		jpf.NewJsonResponseDecoder[answerResponse](),
+		modelBuilder.BuildAgentModel(answerResponse{}),
 	)
 }
