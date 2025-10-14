@@ -3,9 +3,9 @@ module github.com/JoshPattman/agent/cmd/jgent
 go 1.23.1
 
 require (
-	github.com/JoshPattman/agent v0.0.0-20251009204224-acbe58729c83
+	github.com/JoshPattman/agent v0.0.0-20251014150056-f47ded46e022
 	github.com/JoshPattman/agent/agentmcp v0.0.0-20251009204224-acbe58729c83
-	github.com/JoshPattman/jpf v0.8.1
+	github.com/JoshPattman/jpf v0.8.2
 	github.com/invopop/jsonschema v0.13.0
 )
 

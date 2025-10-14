@@ -1,9 +1,11 @@
-github.com/JoshPattman/agent v0.0.0-20251009204224-acbe58729c83 h1:b9u0y/coSXzcIMXtP9w1zGsmscLnXFal2fUOUKhpZA4=
-github.com/JoshPattman/agent v0.0.0-20251009204224-acbe58729c83/go.mod h1:6z92XNuLGSNfJX3dc1o9wQbT8Y+5CN8jdcHdxxSZpJk=
+github.com/JoshPattman/agent v0.0.0-20251014150056-f47ded46e022 h1:u9WV41W62MwGua4OqheLg0/yjnOHrjZzE0peDdqNVAE=
+github.com/JoshPattman/agent v0.0.0-20251014150056-f47ded46e022/go.mod h1:6z92XNuLGSNfJX3dc1o9wQbT8Y+5CN8jdcHdxxSZpJk=
 github.com/JoshPattman/agent/agentmcp v0.0.0-20251009204224-acbe58729c83 h1:ntbbqLDyyajVo0IJK1W5/zf0H1JYdAf6txGIz9KjpKs=
 github.com/JoshPattman/agent/agentmcp v0.0.0-20251009204224-acbe58729c83/go.mod h1:zj8A6BjGxR/fHqH+BuH5WUkhkDa6tdSkrfNsjxfWauQ=
 github.com/JoshPattman/jpf v0.8.1 h1:AlDLtXfUfFnADAZXOzLt3+b8FKlItzE8jNBzU0xDn/8=
 github.com/JoshPattman/jpf v0.8.1/go.mod h1:32CyGHe2NWFJavMX4G/ur/4lhB+ECntESppnvamwEW0=
+github.com/JoshPattman/jpf v0.8.2 h1:XD3K+COoIHAudeM6IDiGQEEA5ry0e1fQ66V2UxaGH9Y=
+github.com/JoshPattman/jpf v0.8.2/go.mod h1:32CyGHe2NWFJavMX4G/ur/4lhB+ECntESppnvamwEW0=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
