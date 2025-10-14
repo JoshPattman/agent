@@ -18,6 +18,7 @@ type ModelConfig struct {
 type AgentConfig struct {
 	AgentName        string            `json:"agent_name"`
 	AgentDescription []string          `json:"agent_description"`
+	Personality      string            `json:"personality"`
 	ModelName        string            `json:"model_name"`
 	MCPServers       []MCPServerConfig `json:"mcp_servers"`
 	SubAgents        []AgentConfig     `json:"sub_agents"`

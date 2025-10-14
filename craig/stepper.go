@@ -18,9 +18,10 @@ var defaultSystemPrompt string
 var defaultReActModePrefix = "You are now in reason-action mode. Your next task / query to respond to is as follows:\n"
 var defaultAnswerModeContent = "You are now in final answer mode, create your final answer."
 
-func newReActStepper(modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string) reActStepper {
+func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string) reActStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
+			personality,
 			systemPrompt,
 			taskPrefix,
 			answerModeContent,
@@ -32,9 +33,10 @@ func newReActStepper(modelBuilder agent.AgentModelBuilder, tools []agent.Tool, s
 	)
 }
 
-func newAnswerStepper(modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string) responseStepper {
+func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string) responseStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
+			personality,
 			systemPrompt,
 			taskPrefix,
 			answerModeContent,

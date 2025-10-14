@@ -20,6 +20,7 @@ const (
 // BUT they will be perfectly formatted, encoragin the LLM to do the same in the future.
 // Thi can optionally add a message to the end which sets the agent into final answer mode.
 type stateHistoryMessageEncoder struct {
+	personality            string
 	systemPrompt           string
 	reactModePrefix        string
 	finalAnswerModeMessage string
@@ -52,7 +53,7 @@ func (enc *stateHistoryMessageEncoder) BuildInputMessages(state executingState) 
 }
 
 func (enc *stateHistoryMessageEncoder) makeSysMessage() (jpf.Message, error) {
-	sysPrompt, err := formatTemplate(enc.systemPrompt, systemPromptData{Tools: enc.tools})
+	sysPrompt, err := formatTemplate(enc.systemPrompt, systemPromptData{Personality: enc.personality, Tools: enc.tools})
 	if err != nil {
 		return jpf.Message{}, err
 	}

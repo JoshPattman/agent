@@ -75,7 +75,7 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig) (func() a
 
 	// Build agent
 	ab := func() agent.Agent {
-		return craig.New(modelBuilder, craig.WithTools(tools...))
+		return craig.New(modelBuilder, craig.WithTools(tools...), craig.WithPersonality(agentConf.Personality))
 	}
 	return ab, nil
 }

@@ -19,6 +19,7 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 	}
 	return &combineReActAgent{
 		reActStepper: newReActStepper(
+			params.personality,
 			modelBuilder,
 			params.tools,
 			params.systemPrompt,
@@ -26,6 +27,7 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 			params.finalAnswerMessage,
 		),
 		answerStepper: newAnswerStepper(
+			params.personality,
 			modelBuilder,
 			params.tools,
 			params.systemPrompt,
@@ -37,6 +39,7 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 }
 
 type agentParams struct {
+	personality        string
 	systemPrompt       string
 	taskPrefix         string
 	finalAnswerMessage string
@@ -66,6 +69,12 @@ func WithTaskPrefix(prefix string) NewOpt {
 func WithFinalAnswerMessage(msg string) NewOpt {
 	return func(a *agentParams) {
 		a.finalAnswerMessage = msg
+	}
+}
+
+func WithPersonality(personality string) NewOpt {
+	return func(a *agentParams) {
+		a.personality = personality
 	}
 }
 

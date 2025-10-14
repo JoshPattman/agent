@@ -33,5 +33,6 @@ type executingState struct {
 }
 
 type systemPromptData struct {
-	Tools []agent.Tool
+	Personality string
+	Tools       []agent.Tool
 }
