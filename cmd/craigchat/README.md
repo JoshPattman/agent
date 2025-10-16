@@ -1,13 +1,13 @@
-# jgent
+# craigchat - Chat to your AI with an interactive TUI.
 
-A command line tool for interacting with AI agents configured via JSON files. This is a simple demo - for somthing more advanced look at craigchat.
+A TUI for interacting with AI agents configured via JSON files.
 - Attach MCP tools (text-tools only)
 - Create sub agents recursively
 
 ## Usage
 
 ```bash
-jgent [flags]
+craigchat [flags]
 ```
 
 ### Flags
