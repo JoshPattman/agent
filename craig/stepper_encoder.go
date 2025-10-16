@@ -95,11 +95,16 @@ func (enc *stateHistoryMessageEncoder) makeMessagesForReActSteps(steps []reActSt
 				Role:    jpf.AssistantRole,
 				Content: formatStepForAIMessage(item),
 			},
-			jpf.Message{
-				Role:    jpf.UserRole,
-				Content: formatStepForUserMessage(item),
-			},
 		)
+		if len(item.ActionObservations) > 0 {
+			messages = append(
+				messages,
+				jpf.Message{
+					Role:    jpf.UserRole,
+					Content: formatStepForUserMessage(item),
+				},
+			)
+		}
 	}
 	return messages
 }
