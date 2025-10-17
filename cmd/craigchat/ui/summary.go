@@ -51,10 +51,16 @@ func (m summary) View() string {
 		Padding(1)
 
 	headerStyle := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("6"))
+		Foreground(lipgloss.Color("6")).
+		Bold(true)
+	modelStyle := lipgloss.NewStyle().
+		Foreground(lipgloss.Color("7")).
+		Bold(true)
+	topRowContent := headerStyle.Render(m.summary.Name) + " ~ " + modelStyle.Render(m.summary.ModelName)
+	topRow := lipgloss.NewStyle().Width(m.width-2).Border(lipgloss.ASCIIBorder(), false, false, true, false).AlignHorizontal(lipgloss.Center).Render(topRowContent)
 	content := fmt.Sprintf(
-		"%s (%s)\n%s\n%d MCP tools and %d subagents.\n\nInput: %d\nOutput: %d",
-		headerStyle.Render(m.summary.Name), m.summary.ModelName,
+		"%s\n%s\n%d MCP tools and %d subagents.\n\nInput: %d\nOutput: %d",
+		topRow,
 		strings.Join(m.summary.Description, " "),
 		m.summary.NumMCP, m.summary.NumSubAgents,
 		m.usage.InputTokens,
