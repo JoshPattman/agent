@@ -237,3 +237,53 @@ func (t *continueSubagentTool) Call(args map[string]any) (string, error) {
 
 	return fmt.Sprintf("Subagent '%s' responded:\n\n%s", conversationID, answer), nil
 }
+
+// NewAgentQuickQuestionTool creates a tool that builds a fresh agent and asks a query.
+// The tool's name will be agent_<name> and the description is formatted using agentDescription.
+func NewAgentQuickQuestionTool(buildAgent func() Agent, name string, agentDescription string) Tool {
+	return &newAgentQuickQuestionTool{
+		buildAgent:       buildAgent,
+		name:             name,
+		agentDescription: agentDescription,
+	}
+}
+
+type newAgentQuickQuestionTool struct {
+	buildAgent       func() Agent
+	name             string
+	agentDescription string
+}
+
+func (t *newAgentQuickQuestionTool) Name() string {
+	return "agent_" + t.name
+}
+
+func (t *newAgentQuickQuestionTool) Description() []string {
+	return []string{
+		"Agent: " + t.name + " — " + t.agentDescription,
+		"Provide 'query' (string) - the question to ask the new agent.",
+		"This creates a completely new agent instance each time, so there's no conversation history.",
+	}
+}
+
+func (t *newAgentQuickQuestionTool) Call(args map[string]any) (string, error) {
+	queryRaw, ok := args["query"]
+	if !ok {
+		return "", fmt.Errorf("missing required argument: query")
+	}
+	query, ok := queryRaw.(string)
+	if !ok {
+		return "", fmt.Errorf("query must be a string")
+	}
+
+	// Build a fresh agent
+	agent := t.buildAgent()
+
+	// Ask the query and return the result
+	answer, err := agent.Answer(query)
+	if err != nil {
+		return "", err
+	}
+
+	return answer, nil
+}

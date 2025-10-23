@@ -71,7 +71,7 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.chat, _ = m.chat.Update(SetHeight{m.height - 3})
 		m.textInput, _ = m.textInput.Update(SetWidth{mainWidth - 2})
 		m.summary, _ = m.summary.Update(SetWidth{summaryWidth - 3})
-		m.summary, _ = m.summary.Update(SetHeight{m.height - 4})
+		m.summary, _ = m.summary.Update(SetHeight{m.height - 2})
 		return m, nil
 	case UserMessageSend:
 		m.chat, _ = m.chat.Update(AddMessage{UserMessage, msg.Message})
@@ -112,7 +112,7 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				for j := range aa {
 					aa[j] = ao[i].Action.Args[j]
 				}
-				toolCalls[i] = fmt.Sprintf("%s?%s", s, craig.FormatActionArgsForDisplay(aa))
+				toolCalls[i] = fmt.Sprintf("%s?%s", ao[i].Action.Name, craig.FormatActionArgsForDisplay(aa))
 			}
 			if sendConcMsg != nil {
 				sendConcMsg(AIReasoningSend{s, toolCalls})

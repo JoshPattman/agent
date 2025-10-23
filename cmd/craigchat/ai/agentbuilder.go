@@ -2,6 +2,7 @@ package ai
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/JoshPattman/agent"
 	"github.com/JoshPattman/agent/agentmcp"
@@ -38,6 +39,10 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, usageCoun
 
 	// Create built-in tools
 	tools = append(tools, &timeTool{})
+	if agentConf.ViewFiles {
+		tools = append(tools, &listDirectoryTool{})
+		tools = append(tools, &readFileTool{})
+	}
 
 	// Create agent-as-tool tools
 	for _, ac := range agentConf.SubAgents {
@@ -45,7 +50,7 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, usageCoun
 		if err != nil {
 			return nil, err
 		}
-		tools = append(tools, agent.AgentAsTool(ab, ac.AgentName, ac.AgentDescription))
+		tools = append(tools, agent.NewAgentQuickQuestionTool(ab, ac.AgentName, strings.Join(ac.AgentDescription, ". ")))
 	}
 
 	// Build agent

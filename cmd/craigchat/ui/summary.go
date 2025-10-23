@@ -46,7 +46,7 @@ func (m summary) View() string {
 	boxStyle := lipgloss.NewStyle().
 		Width(m.width).
 		Height(m.height).
-		Border(lipgloss.DoubleBorder(), true, true, true, true).
+		Border(lipgloss.DoubleBorder(), false, false, false, true).
 		BorderForeground(lipgloss.Color("8")).
 		Padding(1)
 
@@ -66,7 +66,6 @@ func (m summary) View() string {
 		m.usage.InputTokens,
 		m.usage.OutputTokens,
 	)
-	// content = ""
 	content = boxStyle.Render(content)
 	return content
 }
