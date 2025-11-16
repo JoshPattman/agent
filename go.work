@@ -5,6 +5,5 @@ toolchain go1.24.9
 use (
 	.
 	./agentmcp
-	./cmd/craigchat
-	./cmd/jgent
+	./cmd/jchat
 )

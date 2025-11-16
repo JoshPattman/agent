@@ -1,12 +1,13 @@
 package main
 
 import (
-	"craigchat/ai"
-	"craigchat/ui"
 	"encoding/json"
-	"flag"
+	"errors"
 	"fmt"
+	"jchat/ai"
+	"jchat/ui"
 	"os"
+	"path/filepath"
 	"time"
 
 	"github.com/JoshPattman/agent"
@@ -48,18 +49,41 @@ func main() {
 	}
 }
 
+var DefaultAgentConfig = ai.AgentConfig{
+	AgentName: "craig",
+	AgentDescription: []string{
+		"A general purpose agent called craig",
+		"Has no tool acsess",
+	},
+	Personality: "You are an agent called CRAIG",
+	ModelName:   "default_model",
+}
+
+var DefaultModelsConfig = ai.ModelsConfig{
+	Models: map[string]ai.ModelConfig{
+		"default_model": {
+			URL:  "",
+			Name: "gpt-4.1",
+			Key:  "Your API Key Here",
+		},
+	},
+}
+
 func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *jpf.UsageCounter, error) {
-	// Parse flags
-	agentFileName := flag.String("agent", "./agent.json", "the path of the agent config file to use")
-	modelsFileName := flag.String("models", "./models.json", "the path of the models config file to use")
-	flag.Parse()
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return nil, ai.AgentConfig{}, nil, errors.Join(errors.New("could not load user home directory"), err)
+	}
+	dataPath := filepath.Join(homeDir, "jchat")
+	agentFileName := filepath.Join(dataPath, "agent.json")
+	modelsFileName := filepath.Join(dataPath, "models.json")
 
 	// Load config files
-	modelsConf, err := loadJSONFile[ai.ModelsConfig](*modelsFileName)
+	modelsConf, err := loadJSONFileButCreateIfNotExist(modelsFileName, DefaultModelsConfig)
 	if err != nil {
 		return nil, ai.AgentConfig{}, nil, err
 	}
-	agentConf, err := loadJSONFile[ai.AgentConfig](*agentFileName)
+	agentConf, err := loadJSONFileButCreateIfNotExist(agentFileName, DefaultAgentConfig)
 	if err != nil {
 		return nil, ai.AgentConfig{}, nil, err
 	}
@@ -71,6 +95,33 @@ func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *
 		return nil, ai.AgentConfig{}, nil, err
 	}
 	return func() (a agent.Agent, err error) { return builder(), nil }, agentConf, usageCounter, nil
+}
+
+func loadJSONFileButCreateIfNotExist[T any](filePath string, defaultVal T) (T, error) {
+	result, err := loadJSONFile[T](filePath)
+	if errors.Is(err, os.ErrNotExist) {
+		folder := filepath.Dir(filePath)
+		err := os.MkdirAll(folder, os.ModePerm)
+		if err != nil {
+			return *new(T), err
+		}
+		file, err := os.Create(filePath)
+		if err != nil {
+			return *new(T), err
+		}
+		defer file.Close()
+		enc := json.NewEncoder(file)
+		enc.SetIndent("", "    ")
+		err = enc.Encode(defaultVal)
+		if err != nil {
+			return *new(T), err
+		}
+		return defaultVal, nil
+	} else if err != nil {
+		return *new(T), err
+	} else {
+		return result, nil
+	}
 }
 
 func loadJSONFile[T any](filePath string) (T, error) {
