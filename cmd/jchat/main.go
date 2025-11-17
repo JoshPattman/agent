@@ -65,6 +65,17 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 			SubAgents:   make([]string, 0),
 			ViewFiles:   false,
 		},
+		"aws_assistant": {
+			AgentDescription: []string{
+				"An assistant that can assist with various AWS features",
+				"Primarily good at reading the documentation",
+			},
+			Personality: "You are an AWS assistant",
+			ModelName:   "default_model",
+			MCPServers:  []string{"aws_docs"},
+			SubAgents:   make([]string, 0),
+			ViewFiles:   false,
+		},
 	},
 }
 
@@ -80,10 +91,10 @@ var DefaultModelsConfig = ai.ModelsConfig{
 
 var DefaultMCPServersConfig = ai.MCPServersConfig{
 	MCPServers: map[string]ai.MCPServerConfig{
-		"dummy_server": {
-			Addr: "https://my-mcp-server.com/mcp",
+		"aws_docs": {
+			Addr: "https://knowledge-mcp.global.api.aws",
 			Headers: map[string]string{
-				"Authorisation": "Bearer API_KEY",
+				"Dummy": "Header",
 			},
 		},
 	},
