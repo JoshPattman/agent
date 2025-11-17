@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"flag"
 	"fmt"
 	"jchat/ai"
 	"jchat/ui"
@@ -16,18 +17,20 @@ import (
 )
 
 func main() {
-	agentBuilder, agentConf, usageCounter, err := loadAndCreateAgentBuilder()
+	agentName := flag.String("a", "", "the name of the agent in the agent file to chat to")
+	flag.Parse()
+
+	if *agentName == "" {
+		fmt.Println("Must specify agent name")
+		os.Exit(1)
+	}
+
+	agentBuilder, agentSum, usageCounter, err := loadAndCreateAgentBuilder(*agentName)
 	if err != nil {
 		fmt.Println("Error loading config:", err)
 		os.Exit(1)
 	}
-	chat := ui.NewChatPage(agentBuilder, ui.AgentSummary{
-		Name:         agentConf.AgentName,
-		Description:  agentConf.AgentDescription,
-		NumMCP:       len(agentConf.MCPServers),
-		NumSubAgents: len(agentConf.SubAgents),
-		ModelName:    agentConf.ModelName,
-	})
+	chat := ui.NewChatPage(agentBuilder, agentSum)
 	p := tea.NewProgram(
 		chat,
 		tea.WithAltScreen(),
@@ -49,14 +52,20 @@ func main() {
 	}
 }
 
-var DefaultAgentConfig = ai.AgentConfig{
-	AgentName: "craig",
-	AgentDescription: []string{
-		"A general purpose agent called craig",
-		"Has no tool acsess",
+var DefaultAgentsConfig = ai.AgentsConfig{
+	Agents: map[string]ai.AgentConfig{
+		"craig": {
+			AgentDescription: []string{
+				"A general purpose agent called craig",
+				"Has no tool acsess",
+			},
+			Personality: "You are an agent called CRAIG",
+			ModelName:   "default_model",
+			MCPServers:  make([]string, 0),
+			SubAgents:   make([]string, 0),
+			ViewFiles:   false,
+		},
 	},
-	Personality: "You are an agent called CRAIG",
-	ModelName:   "default_model",
 }
 
 var DefaultModelsConfig = ai.ModelsConfig{
@@ -80,10 +89,10 @@ var DefaultMCPServersConfig = ai.MCPServersConfig{
 	},
 }
 
-func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *jpf.UsageCounter, error) {
+func loadAndCreateAgentBuilder(activeAgentName string) (func() (agent.Agent, error), ui.AgentSummary, *jpf.UsageCounter, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return nil, ai.AgentConfig{}, nil, errors.Join(errors.New("could not load user home directory"), err)
+		return nil, ui.AgentSummary{}, nil, errors.Join(errors.New("could not load user home directory"), err)
 	}
 	dataPath := filepath.Join(homeDir, "jchat")
 	agentFileName := filepath.Join(dataPath, "agent.json")
@@ -93,24 +102,32 @@ func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *
 	// Load config files
 	modelsConf, err := loadJSONFileButCreateIfNotExist(modelsFileName, DefaultModelsConfig)
 	if err != nil {
-		return nil, ai.AgentConfig{}, nil, err
+		return nil, ui.AgentSummary{}, nil, err
 	}
-	agentConf, err := loadJSONFileButCreateIfNotExist(agentFileName, DefaultAgentConfig)
+	agentConf, err := loadJSONFileButCreateIfNotExist(agentFileName, DefaultAgentsConfig)
 	if err != nil {
-		return nil, ai.AgentConfig{}, nil, err
+		return nil, ui.AgentSummary{}, nil, err
 	}
 	mcpsConf, err := loadJSONFileButCreateIfNotExist(mcpFileName, DefaultMCPServersConfig)
 	if err != nil {
-		return nil, ai.AgentConfig{}, nil, err
+		return nil, ui.AgentSummary{}, nil, err
 	}
 
 	// Build the agent
 	usageCounter := jpf.NewUsageCounter()
-	builder, err := ai.BuildAgentBuilder(modelsConf, agentConf, mcpsConf, usageCounter)
+	builder, err := ai.BuildAgentBuilder(activeAgentName, modelsConf, agentConf, mcpsConf, usageCounter)
 	if err != nil {
-		return nil, ai.AgentConfig{}, nil, err
+		return nil, ui.AgentSummary{}, nil, err
 	}
-	return func() (a agent.Agent, err error) { return builder(), nil }, agentConf, usageCounter, nil
+	activeAgent := agentConf.Agents[activeAgentName]
+	sum := ui.AgentSummary{
+		Name:         activeAgentName,
+		Description:  activeAgent.AgentDescription,
+		NumMCP:       len(activeAgent.MCPServers),
+		NumSubAgents: len(activeAgent.SubAgents),
+		ModelName:    activeAgent.ModelName,
+	}
+	return func() (a agent.Agent, err error) { return builder(), nil }, sum, usageCounter, nil
 }
 
 func loadJSONFileButCreateIfNotExist[T any](filePath string, defaultVal T) (T, error) {

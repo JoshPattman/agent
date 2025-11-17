@@ -10,7 +10,11 @@ import (
 	"github.com/JoshPattman/jpf"
 )
 
-func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, mcpsConf MCPServersConfig, usageCounter *jpf.UsageCounter) (func() agent.Agent, error) {
+func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsConf AgentsConfig, mcpsConf MCPServersConfig, usageCounter *jpf.UsageCounter) (func() agent.Agent, error) {
+	agentConf, ok := agentsConf.Agents[activeAgentName]
+	if !ok {
+		return nil, fmt.Errorf("could not find a configured agent called '%s'", activeAgentName)
+	}
 	// Get model builder
 	model, ok := modelsConf.Models[agentConf.ModelName]
 	if !ok {
@@ -50,11 +54,12 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, mcpsConf 
 
 	// Create agent-as-tool tools
 	for _, ac := range agentConf.SubAgents {
-		ab, err := BuildAgentBuilder(modelsConf, ac, mcpsConf, usageCounter)
+		ab, err := BuildAgentBuilder(ac, modelsConf, agentsConf, mcpsConf, usageCounter)
 		if err != nil {
 			return nil, err
 		}
-		tools = append(tools, agent.NewAgentQuickQuestionTool(ab, ac.AgentName, strings.Join(ac.AgentDescription, ". ")))
+		subAgentConfig := agentsConf.Agents[ac] // This is safe to not check as we already checked above recursively
+		tools = append(tools, agent.NewAgentQuickQuestionTool(ab, ac, strings.Join(subAgentConfig.AgentDescription, ". ")))
 	}
 
 	// Build agent
