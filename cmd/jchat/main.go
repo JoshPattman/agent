@@ -69,6 +69,17 @@ var DefaultModelsConfig = ai.ModelsConfig{
 	},
 }
 
+var DefaultMCPServersConfig = ai.MCPServersConfig{
+	MCPServers: map[string]ai.MCPServerConfig{
+		"dummy_server": {
+			Addr: "https://my-mcp-server.com/mcp",
+			Headers: map[string]string{
+				"Authorisation": "Bearer API_KEY",
+			},
+		},
+	},
+}
+
 func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *jpf.UsageCounter, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -77,6 +88,7 @@ func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *
 	dataPath := filepath.Join(homeDir, "jchat")
 	agentFileName := filepath.Join(dataPath, "agent.json")
 	modelsFileName := filepath.Join(dataPath, "models.json")
+	mcpFileName := filepath.Join(dataPath, "mcp.json")
 
 	// Load config files
 	modelsConf, err := loadJSONFileButCreateIfNotExist(modelsFileName, DefaultModelsConfig)
@@ -87,10 +99,14 @@ func loadAndCreateAgentBuilder() (func() (agent.Agent, error), ai.AgentConfig, *
 	if err != nil {
 		return nil, ai.AgentConfig{}, nil, err
 	}
+	mcpsConf, err := loadJSONFileButCreateIfNotExist(mcpFileName, DefaultMCPServersConfig)
+	if err != nil {
+		return nil, ai.AgentConfig{}, nil, err
+	}
 
 	// Build the agent
 	usageCounter := jpf.NewUsageCounter()
-	builder, err := ai.BuildAgentBuilder(modelsConf, agentConf, usageCounter)
+	builder, err := ai.BuildAgentBuilder(modelsConf, agentConf, mcpsConf, usageCounter)
 	if err != nil {
 		return nil, ai.AgentConfig{}, nil, err
 	}

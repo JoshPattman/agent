@@ -10,7 +10,7 @@ import (
 	"github.com/JoshPattman/jpf"
 )
 
-func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, usageCounter *jpf.UsageCounter) (func() agent.Agent, error) {
+func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, mcpsConf MCPServersConfig, usageCounter *jpf.UsageCounter) (func() agent.Agent, error) {
 	// Get model builder
 	model, ok := modelsConf.Models[agentConf.ModelName]
 	if !ok {
@@ -25,7 +25,11 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, usageCoun
 
 	// Create MCPtools
 	tools := make([]agent.Tool, 0)
-	for _, server := range agentConf.MCPServers {
+	for _, serverName := range agentConf.MCPServers {
+		server, ok := mcpsConf.MCPServers[serverName]
+		if !ok {
+			return nil, fmt.Errorf("could not find mcp server '%s'", serverName)
+		}
 		client, err := agentmcp.CreateClient(server.Addr, server.Headers)
 		if err != nil {
 			return nil, err
@@ -46,7 +50,7 @@ func BuildAgentBuilder(modelsConf ModelsConfig, agentConf AgentConfig, usageCoun
 
 	// Create agent-as-tool tools
 	for _, ac := range agentConf.SubAgents {
-		ab, err := BuildAgentBuilder(modelsConf, ac, usageCounter)
+		ab, err := BuildAgentBuilder(modelsConf, ac, mcpsConf, usageCounter)
 		if err != nil {
 			return nil, err
 		}

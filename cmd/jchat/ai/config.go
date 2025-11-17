@@ -11,13 +11,17 @@ type ModelConfig struct {
 }
 
 type AgentConfig struct {
-	AgentName        string            `json:"agent_name"`
-	AgentDescription []string          `json:"agent_description"`
-	Personality      string            `json:"personality"`
-	ModelName        string            `json:"model_name"`
-	MCPServers       []MCPServerConfig `json:"mcp_servers"`
-	SubAgents        []AgentConfig     `json:"sub_agents"`
-	ViewFiles        bool              `json:"view_files"`
+	AgentName        string        `json:"agent_name"`
+	AgentDescription []string      `json:"agent_description"`
+	Personality      string        `json:"personality"`
+	ModelName        string        `json:"model_name"`
+	MCPServers       []string      `json:"mcp_servers"`
+	SubAgents        []AgentConfig `json:"sub_agents"`
+	ViewFiles        bool          `json:"view_files"`
+}
+
+type MCPServersConfig struct {
+	MCPServers map[string]MCPServerConfig `json:"mcp_servers"`
 }
 
 type MCPServerConfig struct {

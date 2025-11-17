@@ -1,4 +1,4 @@
-# craigchat - Chat to your AI with an interactive TUI.
+# JChat - Chat to your AI with an interactive TUI.
 
 A TUI for interacting with AI agents configured via JSON files.
 - Attach MCP tools (text-tools only)
@@ -7,15 +7,11 @@ A TUI for interacting with AI agents configured via JSON files.
 ## Usage
 
 ```bash
-craigchat [flags]
+jchat [flags]
 ```
 
-### Flags
-
-- `-agent string`: Path to the agent config file (default: "./agent.json")
-- `-models string`: Path to the models config file (default: "./models.json")
-
 ## Configuration Files
+Configuration files are created on first boot, and can be found at `~/jchat/`.
 
 ### agent.json
 
