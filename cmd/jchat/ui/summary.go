@@ -46,9 +46,8 @@ func (m summary) View() string {
 	boxStyle := lipgloss.NewStyle().
 		Width(m.width).
 		Height(m.height).
-		Border(lipgloss.DoubleBorder(), false, false, false, true).
-		BorderForeground(lipgloss.Color("8")).
-		Padding(1)
+		BorderForeground(lipgloss.Color("236")).
+		Padding(1).Border(lipgloss.DoubleBorder(), false, false, false, true)
 
 	headerStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("6")).
@@ -57,9 +56,14 @@ func (m summary) View() string {
 		Foreground(lipgloss.Color("7")).
 		Bold(true)
 	topRowContent := headerStyle.Render(m.summary.Name) + " ~ " + modelStyle.Render(m.summary.ModelName)
-	topRow := lipgloss.NewStyle().Width(m.width-2).Border(lipgloss.ASCIIBorder(), false, false, true, false).AlignHorizontal(lipgloss.Center).Render(topRowContent)
+	topRowStyle := lipgloss.NewStyle().
+		Width(m.width-2).
+		BorderForeground(lipgloss.Color("236")).
+		Border(lipgloss.DoubleBorder(), false, false, true, false).
+		AlignHorizontal(lipgloss.Center)
+	topRow := topRowStyle.Render(topRowContent)
 	content := fmt.Sprintf(
-		"%s\n%s\n%d MCP tools and %d subagents.\n\nInput: %d\nOutput: %d",
+		"%s\n%s\n%d MCP servers and %d subagents.\n\nInput: %d\nOutput: %d",
 		topRow,
 		strings.Join(m.summary.Description, " "),
 		m.summary.NumMCP, m.summary.NumSubAgents,

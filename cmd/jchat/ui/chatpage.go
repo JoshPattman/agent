@@ -62,7 +62,7 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.width = msg.Width
 		m.height = msg.Height
 
-		summaryWidth := 50
+		summaryWidth := 40
 		mainWidth := m.width - summaryWidth
 		if mainWidth < 5 {
 			mainWidth = 5
@@ -151,10 +151,8 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m chatPage) View() string {
 	mainStyle := lipgloss.NewStyle().
-		Width(m.width - 2).
-		Height(m.height - 2).
-		BorderForeground(lipgloss.Color("8")).
-		Border(lipgloss.DoubleBorder())
+		Width(m.width).
+		Height(m.height)
 	content := lipgloss.JoinVertical(lipgloss.Left, m.chat.View(), m.textInput.View())
 	content = lipgloss.JoinHorizontal(lipgloss.Bottom, content, m.summary.View())
 	return mainStyle.Render(content)

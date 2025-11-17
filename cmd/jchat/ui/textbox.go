@@ -71,9 +71,10 @@ func (m textBox) View() string {
 	var text string
 	if m.enabled {
 		text = m.text
+		style = style.Background(lipgloss.Color("233"))
 	} else {
 		text = m.disabledText
-		style = style.Foreground(lipgloss.Color("8"))
+		style = style.Foreground(lipgloss.Color("8")).Background(lipgloss.Color("233"))
 	}
 
 	return style.Render(fmt.Sprintf("> %s", text))
