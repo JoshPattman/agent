@@ -18,6 +18,7 @@ import (
 
 func main() {
 	agentName := flag.String("a", "", "the name of the agent in the agent file to chat to")
+	quickChat := flag.String("q", "", "when specified, will simply send the message and print the result to stdout")
 	flag.Parse()
 
 	if *agentName == "" {
@@ -30,25 +31,40 @@ func main() {
 		fmt.Println("Error loading config:", err)
 		os.Exit(1)
 	}
-	chat := ui.NewChatPage(agentBuilder, agentSum)
-	p := tea.NewProgram(
-		chat,
-		tea.WithAltScreen(),
-		tea.WithMouseCellMotion(),
-	)
 
-	go func() {
-		for {
-			p.Send(ui.UsageMessage{Usage: usageCounter.Get()})
-			time.Sleep(time.Second / 2)
+	if *quickChat != "" {
+		agent, err := agentBuilder()
+		if err != nil {
+			fmt.Println("Could not create quick agent:", err)
+			os.Exit(1)
 		}
-	}()
+		result, err := agent.Answer(*quickChat)
+		if err != nil {
+			fmt.Println("Could not run quick agent:", err)
+			os.Exit(1)
+		}
+		fmt.Println(result)
+	} else {
+		chat := ui.NewChatPage(agentBuilder, agentSum)
+		p := tea.NewProgram(
+			chat,
+			tea.WithAltScreen(),
+			tea.WithMouseCellMotion(),
+		)
 
-	go p.Send(ui.SetConcurrentMessageSender{MsgSender: p.Send})
+		go func() {
+			for {
+				p.Send(ui.UsageMessage{Usage: usageCounter.Get()})
+				time.Sleep(time.Second / 2)
+			}
+		}()
 
-	if _, err := p.Run(); err != nil {
-		fmt.Printf("Error running program: %v", err)
-		os.Exit(1)
+		go p.Send(ui.SetConcurrentMessageSender{MsgSender: p.Send})
+
+		if _, err := p.Run(); err != nil {
+			fmt.Printf("Error running program: %v", err)
+			os.Exit(1)
+		}
 	}
 }
 
