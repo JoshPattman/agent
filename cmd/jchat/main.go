@@ -73,7 +73,7 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 		"craig": {
 			AgentDescription: []string{
 				"A general purpose agent called craig",
-				"Has no tool acsess",
+				"Has no tools",
 			},
 			Personality: "You are an agent called CRAIG",
 			ModelName:   "default_model",
