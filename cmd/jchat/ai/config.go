@@ -5,9 +5,10 @@ type ModelsConfig struct {
 }
 
 type ModelConfig struct {
-	URL  string `json:"url"`
-	Name string `json:"name"`
-	Key  string `json:"key"`
+	URL     string            `json:"url"`
+	Name    string            `json:"name"`
+	Key     string            `json:"key"`
+	Headers map[string]string `json:"headers"`
 }
 
 type AgentsConfig struct {

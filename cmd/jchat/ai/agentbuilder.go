@@ -25,6 +25,7 @@ func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsCo
 		model.Name,
 		model.URL,
 		usageCounter,
+		model.Headers,
 	}
 
 	// Create MCPtools

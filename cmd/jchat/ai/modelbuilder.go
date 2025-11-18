@@ -12,6 +12,7 @@ type ModelBuilder struct {
 	ModelName    string
 	URL          string
 	UsageCounter *jpf.UsageCounter
+	Headers      map[string]string
 }
 
 func (b *ModelBuilder) BuildAgentModel(responseType any) jpf.Model {
@@ -19,11 +20,19 @@ func (b *ModelBuilder) BuildAgentModel(responseType any) jpf.Model {
 	if err != nil {
 		panic(err)
 	}
+	opts := []jpf.OpenAIModelOpt{
+		jpf.WithJsonSchema{X: rformat},
+		jpf.WithURL{X: b.URL},
+	}
+	if b.Headers != nil {
+		for k, v := range b.Headers {
+			opts = append(opts, jpf.WithHTTPHeader{K: k, V: v})
+		}
+	}
 	model := jpf.NewOpenAIModel(
 		b.Key,
 		b.ModelName,
-		jpf.WithJsonSchema{X: rformat},
-		jpf.WithURL{X: b.URL},
+		opts...,
 	)
 	model = jpf.NewRetryModel(model, 5)
 	model = jpf.NewUsageCountingModel(model, b.UsageCounter)

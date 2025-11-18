@@ -101,6 +101,9 @@ var DefaultModelsConfig = ai.ModelsConfig{
 			URL:  "",
 			Name: "gpt-4.1",
 			Key:  "Your API Key Here",
+			Headers: map[string]string{
+				"Key": "Value",
+			},
 		},
 	},
 }
@@ -110,7 +113,7 @@ var DefaultMCPServersConfig = ai.MCPServersConfig{
 		"aws_docs": {
 			Addr: "https://knowledge-mcp.global.api.aws",
 			Headers: map[string]string{
-				"Dummy": "Header",
+				"Key": "Value",
 			},
 		},
 	},
