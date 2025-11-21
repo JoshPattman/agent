@@ -80,7 +80,7 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		cmd := func() tea.Msg {
 			result, err := activeAgent.Answer(msg.Message)
 			if err != nil {
-				panic(err) // TODO: Handle gracefully
+				return AIErrorSend{err}
 			}
 			return AIMessageSend{result}
 		}
@@ -98,11 +98,16 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.chat, _ = m.chat.Update(AddMessage{CRAIGReasoningMessage, text})
 		return m, nil
+	case AIErrorSend:
+		m.chat, _ = m.chat.Update(AddMessage{ErrorMessage, msg.Error.Error()})
+		m.textInput, _ = m.textInput.Update(EnableMessage{true})
+		return m, nil
 	case ResetAgentMessage:
 		m.chat, _ = m.chat.Update(ResetMessages{})
 		newAgent, err := m.buildAgent()
 		if err != nil {
-			panic(err) // TODO: Deal with this gracefully
+			cmd := func() tea.Msg { return AIErrorSend{err} }
+			return m, cmd
 		}
 		sendConcMsg := m.sendConcMsg
 		newAgent.SetOnReActCompleteCallback(func(s string, ao []agent.ActionObservation) {

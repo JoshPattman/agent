@@ -47,6 +47,10 @@ type AIReasoningSend struct {
 	ToolCalls []string
 }
 
+type AIErrorSend struct {
+	Error error
+}
+
 type ResetAgentMessage struct{}
 
 type SetConcurrentMessageSender struct {

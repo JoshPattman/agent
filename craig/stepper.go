@@ -28,7 +28,7 @@ func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, t
 			reActState,
 			tools,
 		},
-		jpf.NewJsonResponseDecoder[reActResponse](),
+		jpf.NewJsonResponseDecoder[reActResponse](), //jpf.NewValidatingResponseDecoder(, func(resp reActResponse) error { return fmt.Errorf("%v", resp) }),
 		modelBuilder.BuildAgentModel(reActResponse{}),
 	)
 }

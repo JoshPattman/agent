@@ -52,6 +52,9 @@ func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsCo
 		tools = append(tools, &listDirectoryTool{})
 		tools = append(tools, &readFileTool{})
 	}
+	if agentConf.QuestionFiles {
+		tools = append(tools, NewFileQATool(modelBuilder))
+	}
 
 	// Create agent-as-tool tools
 	for _, ac := range agentConf.SubAgents {

@@ -11,6 +11,7 @@ const (
 	UserMessage MessageType = iota
 	CRAIGMessage
 	CRAIGReasoningMessage
+	ErrorMessage
 )
 
 type Message struct {
@@ -46,6 +47,9 @@ func (c Message) View() string {
 		textColor = lipgloss.Color("")
 	case CRAIGReasoningMessage:
 		borderColor = lipgloss.Color("3")
+		textColor = lipgloss.Color("240")
+	case ErrorMessage:
+		borderColor = lipgloss.Color("1")
 		textColor = lipgloss.Color("240")
 	}
 

@@ -2,6 +2,7 @@ package ai
 
 import (
 	"encoding/json"
+	"time"
 
 	"github.com/JoshPattman/jpf"
 	"github.com/invopop/jsonschema"
@@ -34,7 +35,26 @@ func (b *ModelBuilder) BuildAgentModel(responseType any) jpf.Model {
 		b.ModelName,
 		opts...,
 	)
-	model = jpf.NewRetryModel(model, 5)
+	model = jpf.NewRetryModel(model, 5, jpf.WithDelay{X: time.Second * 2})
+	model = jpf.NewUsageCountingModel(model, b.UsageCounter)
+	return model
+}
+
+func (b *ModelBuilder) BuildFileQAModel() jpf.Model {
+	opts := []jpf.OpenAIModelOpt{
+		jpf.WithURL{X: b.URL},
+	}
+	if b.Headers != nil {
+		for k, v := range b.Headers {
+			opts = append(opts, jpf.WithHTTPHeader{K: k, V: v})
+		}
+	}
+	model := jpf.NewOpenAIModel(
+		b.Key,
+		b.ModelName,
+		opts...,
+	)
+	model = jpf.NewRetryModel(model, 5, jpf.WithDelay{X: time.Second * 2})
 	model = jpf.NewUsageCountingModel(model, b.UsageCounter)
 	return model
 }
