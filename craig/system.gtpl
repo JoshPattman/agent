@@ -16,3 +16,11 @@ Available tools:
 {{else}}
 There are no tools available at the moment.
 {{end}}
+
+{{if .Scenarios}}
+Scenarios (you can call a tool to get the full information for these):
+{{range .Scenarios}}
+- Key: {{.Key}}
+  Headline: {{.Headline}}
+{{end}}
+{{end}}

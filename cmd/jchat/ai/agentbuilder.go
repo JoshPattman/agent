@@ -55,6 +55,9 @@ func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsCo
 	if agentConf.QuestionFiles {
 		tools = append(tools, NewFileQATool(modelBuilder))
 	}
+	if len(agentConf.Scenarios) > 0 {
+		tools = append(tools, agent.NewScenarioRetrieverTool(agentConf.Scenarios))
+	}
 
 	// Create agent-as-tool tools
 	for _, ac := range agentConf.SubAgents {
@@ -68,7 +71,12 @@ func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsCo
 
 	// Build agent
 	ab := func() agent.Agent {
-		return craig.New(modelBuilder, craig.WithTools(tools...), craig.WithPersonality(agentConf.Personality))
+		return craig.New(
+			modelBuilder,
+			craig.WithTools(tools...),
+			craig.WithPersonality(agentConf.Personality),
+			craig.WithScenarios(agentConf.Scenarios),
+		)
 	}
 	return ab, nil
 }

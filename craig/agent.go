@@ -25,6 +25,7 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 			params.systemPrompt,
 			params.taskPrefix,
 			params.finalAnswerMessage,
+			params.scenarios,
 		),
 		answerStepper: newAnswerStepper(
 			params.personality,
@@ -33,6 +34,7 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 			params.systemPrompt,
 			params.taskPrefix,
 			params.finalAnswerMessage,
+			params.scenarios,
 		),
 		tools: params.tools,
 	}
@@ -44,6 +46,7 @@ type agentParams struct {
 	taskPrefix         string
 	finalAnswerMessage string
 	tools              []agent.Tool
+	scenarios          map[string]agent.Scenario
 }
 
 type NewOpt func(*agentParams)
@@ -75,6 +78,12 @@ func WithFinalAnswerMessage(msg string) NewOpt {
 func WithPersonality(personality string) NewOpt {
 	return func(a *agentParams) {
 		a.personality = personality
+	}
+}
+
+func WithScenarios(scenarios map[string]agent.Scenario) NewOpt {
+	return func(ap *agentParams) {
+		ap.scenarios = scenarios
 	}
 }
 

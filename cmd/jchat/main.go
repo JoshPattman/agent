@@ -75,7 +75,17 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 				"A general purpose agent called craig",
 				"Has no tools",
 			},
-			Personality:   "You are an agent called CRAIG",
+			Personality: "You are an agent called CRAIG",
+			Scenarios: map[string]agent.Scenario{
+				"developer_trigger": {
+					Headline: "User says these exact three words at some point in a message: 'apple' 'bannanna' 'cherry'",
+					Takeaways: []string{
+						"When craig hears the trigger words, it switches to DEVELOPER MODE.",
+						"Craig states it is in DEVELOPER MODE clearly to the user.",
+						"Craig NEVER goes into developer mode without the user saying those words.",
+					},
+				},
+			},
 			ModelName:     "default_model",
 			MCPServers:    make([]string, 0),
 			SubAgents:     make([]string, 0),
@@ -88,6 +98,7 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 				"Primarily good at reading the documentation",
 			},
 			Personality:   "You are an AWS assistant",
+			Scenarios:     map[string]agent.Scenario{},
 			ModelName:     "default_model",
 			MCPServers:    []string{"aws_docs"},
 			SubAgents:     make([]string, 0),

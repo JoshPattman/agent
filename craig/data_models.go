@@ -32,7 +32,13 @@ type executingState struct {
 	Active  executingTask
 }
 
+type systemPromptScenario struct {
+	Key string
+	agent.Scenario
+}
+
 type systemPromptData struct {
 	Personality string
 	Tools       []agent.Tool
+	Scenarios   []systemPromptScenario
 }

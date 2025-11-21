@@ -2,6 +2,7 @@ package craig
 
 import (
 	"encoding/json"
+	"slices"
 
 	"github.com/JoshPattman/agent"
 	"github.com/JoshPattman/jpf"
@@ -26,6 +27,7 @@ type stateHistoryMessageEncoder struct {
 	finalAnswerModeMessage string
 	state                  agentState
 	tools                  []agent.Tool
+	scenarios              map[string]agent.Scenario
 }
 
 func (enc *stateHistoryMessageEncoder) BuildInputMessages(state executingState) ([]jpf.Message, error) {
@@ -53,7 +55,27 @@ func (enc *stateHistoryMessageEncoder) BuildInputMessages(state executingState) 
 }
 
 func (enc *stateHistoryMessageEncoder) makeSysMessage() (jpf.Message, error) {
-	sysPrompt, err := formatTemplate(enc.systemPrompt, systemPromptData{Personality: enc.personality, Tools: enc.tools})
+	scens := make([]systemPromptScenario, 0)
+	for k, v := range enc.scenarios {
+		scens = append(scens, systemPromptScenario{
+			Key:      k,
+			Scenario: v,
+		})
+	}
+	slices.SortFunc(scens, func(scenA, scenB systemPromptScenario) int {
+		if scenA.Key > scenB.Key {
+			return 1
+		} else if scenA.Key < scenB.Key {
+			return -1
+		} else {
+			return 0
+		}
+	})
+	sysPrompt, err := formatTemplate(enc.systemPrompt, systemPromptData{
+		Personality: enc.personality,
+		Tools:       enc.tools,
+		Scenarios:   scens,
+	})
 	if err != nil {
 		return jpf.Message{}, err
 	}

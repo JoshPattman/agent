@@ -27,3 +27,8 @@ type ActionObservation struct {
 	Action      Action      `json:"action"`
 	Observation Observation `json:"observation"`
 }
+
+type Scenario struct {
+	Headline  string   `json:"headline"`
+	Takeaways []string `json:"takeaways"`
+}

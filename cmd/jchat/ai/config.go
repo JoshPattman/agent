@@ -1,5 +1,7 @@
 package ai
 
+import "github.com/JoshPattman/agent"
+
 type ModelsConfig struct {
 	Models map[string]ModelConfig `json:"models"`
 }
@@ -16,13 +18,14 @@ type AgentsConfig struct {
 }
 
 type AgentConfig struct {
-	AgentDescription []string `json:"agent_description"`
-	Personality      string   `json:"personality"`
-	ModelName        string   `json:"model_name"`
-	MCPServers       []string `json:"mcp_servers"`
-	SubAgents        []string `json:"sub_agents"`
-	ViewFiles        bool     `json:"view_files"`
-	QuestionFiles    bool     `json:"question_files"`
+	AgentDescription []string                  `json:"agent_description"`
+	Personality      string                    `json:"personality"`
+	Scenarios        map[string]agent.Scenario `json:"scenarios"`
+	ModelName        string                    `json:"model_name"`
+	MCPServers       []string                  `json:"mcp_servers"`
+	SubAgents        []string                  `json:"sub_agents"`
+	ViewFiles        bool                      `json:"view_files"`
+	QuestionFiles    bool                      `json:"question_files"`
 }
 
 type MCPServersConfig struct {

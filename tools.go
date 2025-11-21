@@ -3,9 +3,11 @@ package agent
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/rand"
 	"slices"
+	"strings"
 
 	"github.com/JoshPattman/jpf"
 	"github.com/mitchellh/mapstructure"
@@ -286,4 +288,52 @@ func (t *newAgentQuickQuestionTool) Call(args map[string]any) (string, error) {
 	}
 
 	return answer, nil
+}
+
+func NewScenarioRetrieverTool(scenarios map[string]Scenario) Tool {
+	return FunctionalTool(
+		func(m map[string]any) (string, error) {
+			keysAny, ok := m["keys"]
+			if !ok {
+				return "", errors.New("must specify 'keys'")
+			}
+			keysAnyList, ok := keysAny.([]any)
+			if !ok {
+				return "", errors.New("must specify 'keys' to be a list")
+			}
+			keys := make([]string, len(keysAnyList))
+			for i := range keysAnyList {
+				key, ok := keysAnyList[i].(string)
+				if !ok {
+					return "", errors.New("must specify 'keys' to be a list of strings")
+				}
+				keys[i] = key
+			}
+			results := []string{}
+			for _, scenKey := range keys {
+				scen, ok := scenarios[scenKey]
+				if !ok {
+					results = append(results, fmt.Sprintf("No scenario found with key '%s'", scenKey))
+				} else {
+					lines := make([]string, 0)
+					for _, takeaway := range scen.Takeaways {
+						lines = append(lines, fmt.Sprintf(" - %s", takeaway))
+					}
+					results = append(results, fmt.Sprintf(
+						"Scenario '%s': %s\n%s",
+						scenKey,
+						scen.Headline,
+						strings.Join(lines, "\n"),
+					))
+				}
+			}
+			return strings.Join(results, "\n\n"), nil
+		},
+		"investigate_scenarios",
+		[]string{
+			"Get the full details about the provided scenarios.",
+			"Should be called when the agent notices that the conversation matches on the of provided scenarios, so the agent can align itself to the desired behaviour.",
+			"Need to pass one argument, 'keys', which is a list of string keys matching the scenarios keys specified by the system.",
+		},
+	)
 }

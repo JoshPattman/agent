@@ -18,7 +18,7 @@ var defaultSystemPrompt string
 var defaultReActModePrefix = "You are now in reason-action mode. Your next task / query to respond to is as follows:\n"
 var defaultAnswerModeContent = "You are now in final answer mode, create your final answer."
 
-func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string) reActStepper {
+func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string, scenarios map[string]agent.Scenario) reActStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
 			personality,
@@ -27,13 +27,14 @@ func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, t
 			answerModeContent,
 			reActState,
 			tools,
+			scenarios,
 		},
 		jpf.NewJsonResponseDecoder[reActResponse](), //jpf.NewValidatingResponseDecoder(, func(resp reActResponse) error { return fmt.Errorf("%v", resp) }),
 		modelBuilder.BuildAgentModel(reActResponse{}),
 	)
 }
 
-func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string) responseStepper {
+func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string, scenarios map[string]agent.Scenario) responseStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
 			personality,
@@ -42,6 +43,7 @@ func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, 
 			answerModeContent,
 			answerState,
 			tools,
+			scenarios,
 		},
 		jpf.NewJsonResponseDecoder[answerResponse](),
 		modelBuilder.BuildAgentModel(answerResponse{}),
