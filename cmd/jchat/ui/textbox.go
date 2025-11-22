@@ -2,6 +2,7 @@ package ui
 
 import (
 	"fmt"
+	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/charmbracelet/lipgloss"
@@ -52,6 +53,8 @@ func (m textBox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			return m, cmd
 		} else if len(msgString) == 1 {
 			m.text += msgString
+		} else if msg.Type == tea.KeyRunes {
+			m.text += strings.Trim(msgString, "[]")
 		} else if msgString == "space" {
 			m.text += " "
 		} else if msgString == "backspace" {
@@ -70,23 +73,28 @@ func (m textBox) View() string {
 	arrowStyle := lipgloss.NewStyle()
 	textStyle := lipgloss.NewStyle()
 	finalCharStyle := lipgloss.NewStyle()
+	var promptText string
+	promptTextStyle := lipgloss.NewStyle().Foreground(lipgloss.Color("8"))
 
 	var text string
 	if m.enabled {
 		text = m.text
 		arrowStyle = arrowStyle.Foreground(lipgloss.Color("5"))
 		finalCharStyle = finalCharStyle.Background(lipgloss.Color("7"))
+		if m.text == "" {
+			promptText = "Talk to me..."
+		}
 	} else {
 		text = m.disabledText
 		textStyle = textStyle.Foreground(lipgloss.Color("8"))
 		arrowStyle = arrowStyle.Foreground(lipgloss.Color("8"))
 		finalCharStyle = finalCharStyle.Background(lipgloss.Color("8"))
-
 	}
 
 	arrow := arrowStyle.Render("❯")
 	text = textStyle.Render(text)
 	finalChar := finalCharStyle.Render(" ")
+	promptText = promptTextStyle.Render(promptText)
 
-	return style.Render(fmt.Sprintf("%s %s%s", arrow, text, finalChar))
+	return style.Render(fmt.Sprintf("%s %s%s%s", arrow, text, finalChar, promptText))
 }

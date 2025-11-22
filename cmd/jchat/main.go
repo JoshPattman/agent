@@ -49,7 +49,6 @@ func main() {
 		p := tea.NewProgram(
 			chat,
 			tea.WithAltScreen(),
-			tea.WithMouseCellMotion(),
 		)
 
 		go func() {
