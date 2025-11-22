@@ -42,17 +42,19 @@ func (m textBox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		msgString := msg.String()
 		if msgString == "enter" {
-			var cmd tea.Cmd
-			if m.onComplete != nil {
-				onComplete := m.onComplete
-				text := m.text
-				cmd = func() tea.Msg {
-					return onComplete(text)
+			if m.text != "" {
+				var cmd tea.Cmd
+				if m.onComplete != nil {
+					onComplete := m.onComplete
+					text := m.text
+					cmd = func() tea.Msg {
+						return onComplete(text)
+					}
 				}
+				m.text = ""
+				m.pointer = 0
+				return m, cmd
 			}
-			m.text = ""
-			m.pointer = 0
-			return m, cmd
 		} else if len(msgString) == 1 {
 			m.text = m.text[:m.pointer] + msgString + m.text[m.pointer:]
 			m.pointer++
