@@ -47,10 +47,10 @@ func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsCo
 	}
 
 	// Create built-in tools
-	tools = append(tools, &timeTool{})
+	tools = append(tools, agent.NewTimeTool())
 	if agentConf.ViewFiles {
-		tools = append(tools, &listDirectoryTool{})
-		tools = append(tools, &readFileTool{})
+		tools = append(tools, agent.NewListDirectoryTool())
+		tools = append(tools, agent.NewReadFileTool())
 	}
 	if agentConf.QuestionFiles {
 		tools = append(tools, NewFileQATool(modelBuilder))
