@@ -122,8 +122,10 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			text = fmt.Sprintf("Thougt for %s", formatDuration1dp(msg.For))
 		}
 		m.chat, _ = m.chat.Update(AddMessage{CRAIGReasoningMessage, text})
-		m.awaitingResponse = false
-		m.chat, _ = m.chat.Update(SetChatInfoMessage{""})
+		if len(msg.ToolCalls) == 0 {
+			m.awaitingResponse = false
+			m.chat, _ = m.chat.Update(SetChatInfoMessage{""})
+		}
 		return m, nil
 	case AIErrorSend:
 		m.chat, _ = m.chat.Update(AddMessage{ErrorMessage, msg.Error.Error()})
