@@ -21,6 +21,7 @@ There are no tools available at the moment.
 **Scenarios**:
 > You can call a tool to investigate scenario(s) further.
 > If you suspect a scenario is currently relevant to you, as long as you have not already investigated that scenario, you should **always** investigate it.
+> The user does not know or care about scenarios. Do not mention them explicitly to the user, and do not ask before investigating.
 {{range .Scenarios}}
 - Key: {{.Key}}
   Headline: {{.Headline}}
