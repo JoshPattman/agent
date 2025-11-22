@@ -2,11 +2,13 @@ package agent
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"math/rand"
 	"os"
+	"os/exec"
 	"slices"
 	"strings"
 	"time"
@@ -455,4 +457,55 @@ func (t *readFileTool) Description() []string {
 		"Reads and returns the entire content of a file",
 		"Takes one argument: 'path' (string) - the file path to read",
 	}
+}
+
+func NewExecuteCommandTool() Tool {
+	return FunctionalTool(
+		func(m map[string]any) (string, error) {
+			argsAny, ok := m["args"]
+			if !ok {
+				return "", errors.New("must specify 'args'")
+			}
+			workDirAny, ok := m["workdir"]
+			if !ok {
+				workDirAny = "."
+			}
+			argsAnyList, ok := argsAny.([]any)
+			if !ok {
+				return "", errors.New("must specify 'args' as a list of strings")
+			}
+			args := make([]string, len(argsAnyList))
+			for i := range argsAnyList {
+				args[i], ok = argsAnyList[i].(string)
+				if !ok {
+					return "", errors.New("must specify 'args' as a list of strings")
+				}
+			}
+			if len(args) == 0 {
+				return "", errors.New("must specify at least one arg")
+			}
+			workDir, ok := workDirAny.(string)
+			if !ok {
+				return "", errors.New("must specify 'workdir' as a string (or not specify)")
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, args[0], args[1:]...)
+			cmd.Dir = workDir
+			resBuf := bytes.NewBuffer(nil)
+			cmd.Stdout = resBuf
+			cmd.Stderr = resBuf
+			err := cmd.Run()
+			if err != nil {
+				return "", err
+			}
+			return resBuf.String(), nil
+		},
+		"execute_command",
+		[]string{
+			"Run a command on the host system.",
+			"Must specify 'args' as a string list (the first arg is the command).",
+			"Optionally can also specify 'workdir' as a string, for the dir to run the command in (default is where the user ran you from).",
+		},
+	)
 }

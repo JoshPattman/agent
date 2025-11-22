@@ -26,6 +26,7 @@ type AgentConfig struct {
 	SubAgents        []string                  `json:"sub_agents"`
 	ViewFiles        bool                      `json:"view_files"`
 	QuestionFiles    bool                      `json:"question_files"`
+	RunCommands      bool                      `json:"run_commands"`
 }
 
 type MCPServersConfig struct {
