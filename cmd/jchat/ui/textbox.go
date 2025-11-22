@@ -18,6 +18,7 @@ type textBox struct {
 	disabledText string
 	width        int
 	onComplete   func(string) tea.Msg
+	pointer      int
 }
 
 func (textBox) Init() tea.Cmd {
@@ -50,17 +51,27 @@ func (m textBox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				}
 			}
 			m.text = ""
+			m.pointer = 0
 			return m, cmd
 		} else if len(msgString) == 1 {
-			m.text += msgString
+			m.text = m.text[:m.pointer] + msgString + m.text[m.pointer:]
+			m.pointer++
 		} else if msg.Type == tea.KeyRunes {
-			m.text += strings.Trim(msgString, "[]")
+			toAdd := strings.Trim(msgString, "[]")
+			m.text = m.text[:m.pointer] + toAdd + m.text[m.pointer:]
+			m.pointer += len(toAdd)
 		} else if msgString == "space" {
-			m.text += " "
+			m.text = m.text[:m.pointer] + " " + m.text[m.pointer:]
+			m.pointer++
 		} else if msgString == "backspace" {
-			if len(m.text) > 0 {
-				m.text = m.text[:len(m.text)-1]
+			if m.pointer > 0 {
+				m.text = m.text[:m.pointer-1] + m.text[m.pointer:]
+				m.pointer = m.pointer - 1
 			}
+		} else if msgString == "left" {
+			m.pointer = max(0, m.pointer-1)
+		} else if msgString == "right" {
+			m.pointer = min(len(m.text), m.pointer+1)
 		}
 		return m, nil
 	default:
@@ -90,11 +101,14 @@ func (m textBox) View() string {
 		arrowStyle = arrowStyle.Foreground(lipgloss.Color("8"))
 		finalCharStyle = finalCharStyle.Background(lipgloss.Color("8"))
 	}
+	text += " "
+	textBeforePointer := text[:m.pointer]
+	textOfPointer := text[m.pointer : m.pointer+1]
+	textAfterPointer := text[m.pointer+1:]
+	text = textStyle.Render(textBeforePointer) + finalCharStyle.Render(textOfPointer) + textStyle.Render(textAfterPointer)
 
 	arrow := arrowStyle.Render("❯")
-	text = textStyle.Render(text)
-	finalChar := finalCharStyle.Render(" ")
 	promptText = promptTextStyle.Render(promptText)
 
-	return style.Render(fmt.Sprintf("%s %s%s%s", arrow, text, finalChar, promptText))
+	return style.Render(fmt.Sprintf("%s %s%s", arrow, text, promptText))
 }

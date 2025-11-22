@@ -61,7 +61,7 @@ func (m summary) View() string {
 		Bold(true).
 		Render(m.summary.Name)
 	modelName := lipgloss.NewStyle().
-		Foreground(lipgloss.Color("7")).
+		Foreground(lipgloss.Color("6")).
 		Bold(true).
 		Render(m.summary.ModelName)
 	topRow := lipgloss.NewStyle().

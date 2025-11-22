@@ -43,7 +43,7 @@ func (c Message) View() string {
 		borderColor = lipgloss.Color("5")
 		textColor = lipgloss.Color("")
 	case CRAIGMessage:
-		borderColor = lipgloss.Color("2")
+		borderColor = lipgloss.Color("6")
 		textColor = lipgloss.Color("")
 	case CRAIGReasoningMessage:
 		textColor = lipgloss.Color("240")
