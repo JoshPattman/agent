@@ -1,7 +1,7 @@
-github.com/JoshPattman/agent v0.0.0-20251014194440-245f62d2b984 h1:2/dOFuLYvBvR3XRL2rSHBrWeTAuDxwrEMXENPWoGyZY=
-github.com/JoshPattman/agent v0.0.0-20251014194440-245f62d2b984/go.mod h1:q8yeUr9MbPR+uS8umTgknXKOv7Ssh93IBz7QdAwCmY8=
-github.com/JoshPattman/agent/agentmcp v0.0.0-20251014194440-245f62d2b984 h1:ZGnrxL366HeZZ7Ws6+V86a3E5P/GPb5nDf4U1PPbHnA=
-github.com/JoshPattman/agent/agentmcp v0.0.0-20251014194440-245f62d2b984/go.mod h1:zj8A6BjGxR/fHqH+BuH5WUkhkDa6tdSkrfNsjxfWauQ=
+github.com/JoshPattman/agent v0.0.2 h1:DN67HhptiZE5PDi3dK9OxpPk3RAtWm5O6n148YR92uI=
+github.com/JoshPattman/agent v0.0.2/go.mod h1:q8yeUr9MbPR+uS8umTgknXKOv7Ssh93IBz7QdAwCmY8=
+github.com/JoshPattman/agent/agentmcp v0.0.2 h1:fNDMI5Bhv7u/ckXtlC++6Iygd/2Y9otZV63iywIcIwA=
+github.com/JoshPattman/agent/agentmcp v0.0.2/go.mod h1:zj8A6BjGxR/fHqH+BuH5WUkhkDa6tdSkrfNsjxfWauQ=
 github.com/JoshPattman/jpf v0.8.2 h1:XD3K+COoIHAudeM6IDiGQEEA5ry0e1fQ66V2UxaGH9Y=
 github.com/JoshPattman/jpf v0.8.2/go.mod h1:32CyGHe2NWFJavMX4G/ur/4lhB+ECntESppnvamwEW0=
 github.com/aymanbagabas/go-osc52/v2 v2.0.1 h1:HwpRHbFMcZLEVr42D4p7XBqjyuxQH5SMiErDT4WkJ2k=

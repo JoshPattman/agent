@@ -1,7 +1,7 @@
-github.com/JoshPattman/agent v0.0.0-20251009093024-fec67f7e61e7 h1:iEaeTjHn0xCyNWoDsI7thwWbL2PBzFZJDjhVL0JlXKM=
-github.com/JoshPattman/agent v0.0.0-20251009093024-fec67f7e61e7/go.mod h1:K1y8veCsP2rfnVNKBqMbNafter2D4S/tGgcDef7L3ck=
-github.com/JoshPattman/jpf v0.8.1 h1:AlDLtXfUfFnADAZXOzLt3+b8FKlItzE8jNBzU0xDn/8=
-github.com/JoshPattman/jpf v0.8.1/go.mod h1:32CyGHe2NWFJavMX4G/ur/4lhB+ECntESppnvamwEW0=
+github.com/JoshPattman/agent v0.0.2 h1:DN67HhptiZE5PDi3dK9OxpPk3RAtWm5O6n148YR92uI=
+github.com/JoshPattman/agent v0.0.2/go.mod h1:q8yeUr9MbPR+uS8umTgknXKOv7Ssh93IBz7QdAwCmY8=
+github.com/JoshPattman/jpf v0.8.2 h1:XD3K+COoIHAudeM6IDiGQEEA5ry0e1fQ66V2UxaGH9Y=
+github.com/JoshPattman/jpf v0.8.2/go.mod h1:32CyGHe2NWFJavMX4G/ur/4lhB+ECntESppnvamwEW0=
 github.com/bahlo/generic-list-go v0.2.0 h1:5sz/EEAK+ls5wF+NeqDpk5+iNdMDXrh3z3nPnH1Wvgk=
 github.com/bahlo/generic-list-go v0.2.0/go.mod h1:2KvAjgMlE5NNynlg/5iLrrCCZ2+5xWbdbCW3pNTGyYg=
 github.com/buger/jsonparser v1.1.1 h1:2PnMjfWD7wBILjqQbt530v576A/cAbQvEW9gGIpYMUs=
@@ -25,6 +25,8 @@ github.com/mailru/easyjson v0.7.7 h1:UGYAvKxe3sBsEDzO8ZeWOSlIQfWFlxbzLZe7hwFURr0
 github.com/mailru/easyjson v0.7.7/go.mod h1:xzfreul335JAWq5oZzymOObrkdz5UnU4kGfJJLY9Nlc=
 github.com/mark3labs/mcp-go v0.41.1 h1:w78eWfiQam2i8ICL7AL0WFiq7KHNJQ6UB53ZVtH4KGA=
 github.com/mark3labs/mcp-go v0.41.1/go.mod h1:T7tUa2jO6MavG+3P25Oy/jR7iCeJPHImCZHRymCn39g=
+github.com/mitchellh/mapstructure v1.5.0 h1:jeMsZIYE/09sWLaz43PL7Gy6RuMjD2eJVyuac5Z2hdY=
+github.com/mitchellh/mapstructure v1.5.0/go.mod h1:bFUtVrKA4DC2yAKiSyO/QUcy7e+RRV2QTWOzhPopBRo=
 github.com/pmezard/go-difflib v1.0.0 h1:4DBwDE0NGyQoBHbLQYPwSUPoCMWR5BEzIk/f1lZbAQM=
 github.com/pmezard/go-difflib v1.0.0/go.mod h1:iKH77koFhYxTK1pcRnkKkqfTogsbg7gZNVY4sRDYZ/4=
 github.com/rogpeppe/go-internal v1.9.0 h1:73kH8U+JUqXU8lRuOHeVHaa/SZPifC7BkcraZVejAe8=
