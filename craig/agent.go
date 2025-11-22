@@ -17,6 +17,9 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 	for _, o := range opts {
 		o(params)
 	}
+	if len(params.scenarios) > 0 {
+		params.tools = append(params.tools, agent.NewScenarioRetrieverTool(params.scenarios))
+	}
 	return &combineReActAgent{
 		reActStepper: newReActStepper(
 			params.personality,

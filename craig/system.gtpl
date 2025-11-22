@@ -6,7 +6,7 @@
 {{end}}
 
 {{if .Tools}}
-Available tools:
+**Available tools**:
 {{range .Tools}}
 - {{.Name}}:
   {{range .Description}}
@@ -18,7 +18,9 @@ There are no tools available at the moment.
 {{end}}
 
 {{if .Scenarios}}
-Scenarios (you can call a tool to get the full information for these):
+**Scenarios**:
+> You can call a tool to investigate scenario(s) further.
+> If you suspect a scenario is currently relevant to you, as long as you have not already investigated that scenario, you should **always** investigate it.
 {{range .Scenarios}}
 - Key: {{.Key}}
   Headline: {{.Headline}}

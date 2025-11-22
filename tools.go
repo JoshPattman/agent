@@ -299,17 +299,21 @@ func NewScenarioRetrieverTool(scenarios map[string]Scenario) Tool {
 			if !ok {
 				return "", errors.New("must specify 'keys'")
 			}
-			keysAnyList, ok := keysAny.([]any)
-			if !ok {
-				return "", errors.New("must specify 'keys' to be a list")
-			}
-			keys := make([]string, len(keysAnyList))
-			for i := range keysAnyList {
-				key, ok := keysAnyList[i].(string)
-				if !ok {
-					return "", errors.New("must specify 'keys' to be a list of strings")
+			var keys []string
+			switch keysAny := keysAny.(type) {
+			case []any:
+				keys = make([]string, len(keysAny))
+				for i := range keysAny {
+					key, ok := keysAny[i].(string)
+					if !ok {
+						return "", errors.New("must specify 'keys' to be a list of strings or a single string")
+					}
+					keys[i] = key
 				}
-				keys[i] = key
+			case string:
+				keys = []string{keysAny}
+			default:
+				return "", errors.New("must specify 'keys' to be a list of strings or a single string")
 			}
 			results := []string{}
 			for _, scenKey := range keys {
