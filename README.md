@@ -11,6 +11,10 @@ A simple and flexible ReAct (Reasoning and Acting) agent for Go. This library im
 - **Callback Support**: Hooks for monitoring agent reasoning and actions
 - **Task History**: Built-in conversation and task history management
 
+## Instalation
+- For the agent package (for developers): `go get github.com/JoshPattman/agent`
+- For the agent TUI (interactive way to interact with an agent): `go install github.com/JoshPattman/agent/cmd/jchat@latest`
+
 ## Quick Start
 
 ```go
