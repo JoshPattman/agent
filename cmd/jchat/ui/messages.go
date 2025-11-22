@@ -1,6 +1,8 @@
 package ui
 
 import (
+	"time"
+
 	"github.com/JoshPattman/jpf"
 	tea "github.com/charmbracelet/bubbletea"
 )
@@ -45,6 +47,7 @@ type AIMessageSend struct {
 type AIReasoningSend struct {
 	Reasoning string
 	ToolCalls []string
+	For       time.Duration
 }
 
 type AIErrorSend struct {
@@ -59,4 +62,12 @@ type SetConcurrentMessageSender struct {
 
 type UsageMessage struct {
 	Usage jpf.Usage
+}
+
+type SetChatInfoMessage struct {
+	Message string
+}
+
+type SetThinkingNumDots struct {
+	N int
 }

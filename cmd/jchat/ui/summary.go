@@ -46,8 +46,7 @@ func (m summary) View() string {
 	boxStyle := lipgloss.NewStyle().
 		Width(m.width).
 		Height(m.height).
-		BorderForeground(lipgloss.Color("236")).
-		Padding(1).Border(lipgloss.DoubleBorder(), false, false, false, true)
+		Padding(1)
 
 	headerStyle := lipgloss.NewStyle().
 		Foreground(lipgloss.Color("6")).
@@ -57,9 +56,7 @@ func (m summary) View() string {
 		Bold(true)
 	topRowContent := headerStyle.Render(m.summary.Name) + " ~ " + modelStyle.Render(m.summary.ModelName)
 	topRowStyle := lipgloss.NewStyle().
-		Width(m.width-2).
-		BorderForeground(lipgloss.Color("236")).
-		Border(lipgloss.DoubleBorder(), false, false, true, false).
+		Width(m.width - 2).
 		AlignHorizontal(lipgloss.Center)
 	topRow := topRowStyle.Render(topRowContent)
 	content := fmt.Sprintf(

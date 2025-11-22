@@ -3,6 +3,7 @@ package ui
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/JoshPattman/agent"
 	"github.com/JoshPattman/agent/craig"
@@ -19,6 +20,7 @@ type AgentSummary struct {
 }
 
 func NewChatPage(buildAgent func() (agent.Agent, error), summary AgentSummary) tea.Model {
+	t := time.Now()
 	cp := chatPage{
 		10,
 		10,
@@ -26,8 +28,10 @@ func NewChatPage(buildAgent func() (agent.Agent, error), summary AgentSummary) t
 		NewTextBox(),
 		buildAgent,
 		nil,
+		&t,
 		nil,
 		NewSummary(summary),
+		false,
 	}
 	cp.textInput, _ = cp.textInput.Update(SetTextboxCompleteMessage{
 		func(s string) tea.Msg {
@@ -38,14 +42,16 @@ func NewChatPage(buildAgent func() (agent.Agent, error), summary AgentSummary) t
 }
 
 type chatPage struct {
-	width       int
-	height      int
-	chat        tea.Model
-	textInput   tea.Model
-	buildAgent  func() (agent.Agent, error)
-	activeAgent agent.Agent
-	sendConcMsg func(tea.Msg)
-	summary     tea.Model
+	width               int
+	height              int
+	chat                tea.Model
+	textInput           tea.Model
+	buildAgent          func() (agent.Agent, error)
+	activeAgent         agent.Agent
+	lastUserMessageTime *time.Time
+	sendConcMsg         func(tea.Msg)
+	summary             tea.Model
+	awaitingResponse    bool
 }
 
 func (chatPage) Init() tea.Cmd {
@@ -58,24 +64,35 @@ func (chatPage) Init() tea.Cmd {
 
 func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
+	case SetThinkingNumDots:
+		if !m.awaitingResponse {
+			return m, nil
+		} else {
+			m.chat, _ = m.chat.Update(SetChatInfoMessage{
+				fmt.Sprintf("Thinking%s", strings.Repeat(".", msg.N)),
+			})
+			return m, func() tea.Msg {
+				time.Sleep(time.Second / 4)
+				return SetThinkingNumDots{(msg.N + 1) % 4}
+			}
+		}
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
 
 		summaryWidth := 40
-		mainWidth := m.width - summaryWidth
-		if mainWidth < 5 {
-			mainWidth = 5
-		}
-		m.chat, _ = m.chat.Update(SetWidth{mainWidth - 2})
-		m.chat, _ = m.chat.Update(SetHeight{m.height - 3})
-		m.textInput, _ = m.textInput.Update(SetWidth{mainWidth - 2})
-		m.summary, _ = m.summary.Update(SetWidth{summaryWidth - 3})
-		m.summary, _ = m.summary.Update(SetHeight{m.height - 2})
+		mainWidth := max(m.width-summaryWidth, 5)
+		m.chat, _ = m.chat.Update(SetWidth{mainWidth})
+		m.chat, _ = m.chat.Update(SetHeight{m.height})
+		m.textInput, _ = m.textInput.Update(SetWidth{mainWidth})
+		m.summary, _ = m.summary.Update(SetWidth{summaryWidth})
+		m.summary, _ = m.summary.Update(SetHeight{m.height})
 		return m, nil
 	case UserMessageSend:
 		m.chat, _ = m.chat.Update(AddMessage{UserMessage, msg.Message})
 		m.textInput, _ = m.textInput.Update(EnableMessage{false})
+		*m.lastUserMessageTime = time.Now()
+		m.awaitingResponse = true
 		activeAgent := m.activeAgent
 		cmd := func() tea.Msg {
 			result, err := activeAgent.Answer(msg.Message)
@@ -84,7 +101,11 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			return AIMessageSend{result}
 		}
-		return m, cmd
+		cmdDots := func() tea.Msg {
+			return SetThinkingNumDots{1}
+		}
+		m.chat, _ = m.chat.Update(SetChatInfoMessage{"Thinking..."})
+		return m, tea.Batch(cmd, cmdDots)
 	case AIMessageSend:
 		m.chat, _ = m.chat.Update(AddMessage{CRAIGMessage, msg.Message})
 		m.textInput, _ = m.textInput.Update(EnableMessage{true})
@@ -92,15 +113,23 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case AIReasoningSend:
 		var text string
 		if len(msg.ToolCalls) > 0 {
-			text = fmt.Sprintf("%s -> %s", msg.Reasoning, strings.Join(msg.ToolCalls, ", "))
+			toolCalls := make([]string, len(msg.ToolCalls))
+			for i := range msg.ToolCalls {
+				toolCalls[i] = fmt.Sprintf("  └▶ %s", msg.ToolCalls[i])
+			}
+			text = fmt.Sprintf("%s\n%s", "Called tools", strings.Join(toolCalls, "\n"))
 		} else {
-			text = msg.Reasoning
+			text = fmt.Sprintf("Thougt for %s", formatDuration1dp(msg.For))
 		}
 		m.chat, _ = m.chat.Update(AddMessage{CRAIGReasoningMessage, text})
+		m.awaitingResponse = false
+		m.chat, _ = m.chat.Update(SetChatInfoMessage{""})
 		return m, nil
 	case AIErrorSend:
 		m.chat, _ = m.chat.Update(AddMessage{ErrorMessage, msg.Error.Error()})
 		m.textInput, _ = m.textInput.Update(EnableMessage{true})
+		m.awaitingResponse = false
+		m.chat, _ = m.chat.Update(SetChatInfoMessage{""})
 		return m, nil
 	case ResetAgentMessage:
 		m.chat, _ = m.chat.Update(ResetMessages{})
@@ -120,7 +149,7 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				toolCalls[i] = fmt.Sprintf("%s?%s", ao[i].Action.Name, craig.FormatActionArgsForDisplay(aa))
 			}
 			if sendConcMsg != nil {
-				sendConcMsg(AIReasoningSend{s, toolCalls})
+				sendConcMsg(AIReasoningSend{s, toolCalls, time.Since(*m.lastUserMessageTime)})
 			}
 		})
 		m.activeAgent = newAgent
@@ -161,4 +190,9 @@ func (m chatPage) View() string {
 	content := lipgloss.JoinVertical(lipgloss.Left, m.chat.View(), m.textInput.View())
 	content = lipgloss.JoinHorizontal(lipgloss.Bottom, content, m.summary.View())
 	return mainStyle.Render(content)
+}
+
+func formatDuration1dp(d time.Duration) string {
+	secs := float64(d) / float64(time.Second)
+	return fmt.Sprintf("%.1fs", secs)
 }

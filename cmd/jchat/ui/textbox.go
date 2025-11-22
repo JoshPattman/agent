@@ -67,15 +67,26 @@ func (m textBox) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 
 func (m textBox) View() string {
 	style := lipgloss.NewStyle().MaxWidth(m.width).Width(m.width)
+	arrowStyle := lipgloss.NewStyle()
+	textStyle := lipgloss.NewStyle()
+	finalCharStyle := lipgloss.NewStyle()
 
 	var text string
 	if m.enabled {
 		text = m.text
-		style = style.Background(lipgloss.Color("233"))
+		arrowStyle = arrowStyle.Foreground(lipgloss.Color("5"))
+		finalCharStyle = finalCharStyle.Background(lipgloss.Color("7"))
 	} else {
 		text = m.disabledText
-		style = style.Foreground(lipgloss.Color("8")).Background(lipgloss.Color("233"))
+		textStyle = textStyle.Foreground(lipgloss.Color("8"))
+		arrowStyle = arrowStyle.Foreground(lipgloss.Color("8"))
+		finalCharStyle = finalCharStyle.Background(lipgloss.Color("8"))
+
 	}
 
-	return style.Render(fmt.Sprintf("> %s", text))
+	arrow := arrowStyle.Render("❯")
+	text = textStyle.Render(text)
+	finalChar := finalCharStyle.Render(" ")
+
+	return style.Render(fmt.Sprintf("%s %s%s", arrow, text, finalChar))
 }

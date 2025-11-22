@@ -40,13 +40,12 @@ func (c Message) View() string {
 
 	switch c.msgType {
 	case UserMessage:
-		borderColor = lipgloss.Color("4")
+		borderColor = lipgloss.Color("5")
 		textColor = lipgloss.Color("")
 	case CRAIGMessage:
 		borderColor = lipgloss.Color("2")
 		textColor = lipgloss.Color("")
 	case CRAIGReasoningMessage:
-		borderColor = lipgloss.Color("3")
 		textColor = lipgloss.Color("240")
 	case ErrorMessage:
 		borderColor = lipgloss.Color("1")
@@ -54,12 +53,15 @@ func (c Message) View() string {
 	}
 
 	style := lipgloss.NewStyle().
-		Width(c.width-1).
-		Border(lipgloss.DoubleBorder(), false, false, false, true).
-		BorderForeground(borderColor).
+		Width(c.width - 1).
 		Foreground(textColor).
 		PaddingLeft(1).
 		PaddingRight(1)
+	if c.msgType != CRAIGReasoningMessage {
+		style = style.
+			Border(lipgloss.DoubleBorder(), false, false, false, true).
+			BorderForeground(borderColor)
+	}
 	content := style.Render(c.content)
 	if c.msgType == UserMessage {
 		content = "\n" + content

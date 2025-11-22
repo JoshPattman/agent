@@ -1,6 +1,7 @@
 package ui
 
 import (
+	"fmt"
 	"strings"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -19,6 +20,7 @@ type chat struct {
 	height       int
 	width        int
 	scrollOffset int
+	info         string
 }
 
 func (m chat) Init() tea.Cmd {
@@ -55,6 +57,9 @@ func (m chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		m.messages = append(m.messages, newMessage)
 		return m, nil
+	case SetChatInfoMessage:
+		m.info = msg.Message
+		return m, nil
 	default:
 		return m, nil
 	}
@@ -66,7 +71,13 @@ func (m chat) View() string {
 		renderedMessages[i] = msg.View()
 	}
 	fullContent := lipgloss.JoinVertical(lipgloss.Left, renderedMessages...)
-	fullContent = truncateHeightWithOffset(fullContent, m.height, m.scrollOffset)
+	if m.info == "" {
+		fullContent = truncateHeightWithOffset(fullContent, m.height, m.scrollOffset)
+	} else {
+		fullContent = truncateHeightWithOffset(fullContent, m.height-1, m.scrollOffset)
+		style := lipgloss.NewStyle().Foreground(lipgloss.Color("240"))
+		fullContent = fmt.Sprintf("%s\n %s", fullContent, style.Render(m.info))
+	}
 	style := lipgloss.NewStyle().Height(m.height).AlignVertical(lipgloss.Bottom)
 	return style.Render(fullContent)
 }
