@@ -10,6 +10,7 @@ require (
 	github.com/JoshPattman/jpf v0.8.2
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
+	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/invopop/jsonschema v0.13.0
 )
 
