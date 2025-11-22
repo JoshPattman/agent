@@ -1,4 +1,4 @@
-module jchat
+module github.com/JoshPattman/agent/cmd/jchat
 
 go 1.24.0
 

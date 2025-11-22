@@ -5,11 +5,12 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"jchat/ai"
-	"jchat/ui"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/JoshPattman/agent/cmd/jchat/ai"
+	"github.com/JoshPattman/agent/cmd/jchat/ui"
 
 	"github.com/JoshPattman/agent"
 	"github.com/JoshPattman/jpf"
