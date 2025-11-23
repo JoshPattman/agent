@@ -18,8 +18,24 @@ import (
 )
 
 func main() {
-	agentName := flag.String("a", "", "the name of the agent in the agent file to chat to")
-	quickChat := flag.String("q", "", "when specified, will simply send the message and print the result to stdout")
+	agentName := flag.String("a", "", "The name of the agent in the agent file to chat to, matching an agent name from your agent configuration")
+	quickChat := flag.String("q", "", "If specified will not run interactive mode, but will instead send the specified message to a new agent and print the result to the terminal, without any follow ups")
+	us := flag.Usage
+	flag.Usage = func() {
+		us()
+		homeDir, err := os.UserHomeDir()
+		if err != nil {
+			fmt.Println("Error loading home dir - jchat will not work")
+		}
+		dataPath := filepath.Join(homeDir, "jchat")
+		fmt.Println("\nData is stored at:", dataPath)
+		fmt.Println("\nTo configure JChat, modify the json files at the data directory")
+		fmt.Println(" - agents.json\n\tSet up the different agents to chat to, their personalities, tools they can access, and base models to use")
+		fmt.Println(" - models.json\n\tSpecify the different base models for agents to use")
+		fmt.Println(" - mcp.json\n\tSpecify the MCP servers available to add to agents (only http/https supported right now)")
+		fmt.Println(" - commands.json\n\tSetup custom commands to run on the host machine that the agents can run as tools (if added to an agent), arguments are passed to the command as environment variables")
+		fmt.Println("\nTo allow an agent to use a command or mcp server, you must add its key to the agent. You must also specify the key of the model for each agent to use (different agents may use different keys).")
+	}
 	flag.Parse()
 
 	if *agentName == "" {
@@ -86,11 +102,12 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 					},
 				},
 			},
-			ModelName:     "default_model",
-			MCPServers:    make([]string, 0),
-			SubAgents:     make([]string, 0),
-			ViewFiles:     false,
-			QuestionFiles: false,
+			ModelName:      "default_model",
+			MCPServers:     make([]string, 0),
+			SubAgents:      make([]string, 0),
+			ViewFiles:      false,
+			QuestionFiles:  false,
+			CustomCommands: []string{},
 		},
 		"aws_assistant": {
 			AgentDescription: []string{
@@ -107,13 +124,30 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 			RunCommands:    false,
 			CustomCommands: []string{},
 		},
+		"pingponger": {
+			AgentDescription: []string{
+				"An assistant that can test the custom commands feature",
+			},
+			Personality:   "You are an AI whos job is to test the custom commands (pingpong). You can run both to figure out if the user is on unix or windows.",
+			Scenarios:     map[string]agent.Scenario{},
+			ModelName:     "default_model",
+			MCPServers:    []string{},
+			SubAgents:     make([]string, 0),
+			ViewFiles:     false,
+			QuestionFiles: false,
+			RunCommands:   false,
+			CustomCommands: []string{
+				"ping_pong_unix",
+				"ping_pong_windows",
+			},
+		},
 	},
 }
 
 var DefaultModelsConfig = ai.ModelsConfig{
 	Models: map[string]ai.ModelConfig{
 		"default_model": {
-			URL:  "",
+			URL:  "https://api.openai.com/v1/chat/completions",
 			Name: "gpt-4.1",
 			Key:  "Your API Key Here",
 			Headers: map[string]string{
@@ -136,10 +170,32 @@ var DefaultMCPServersConfig = ai.MCPServersConfig{
 
 var DefaultCustomCommandsConfig = ai.CustomCommandsConfig{
 	Commands: map[string]ai.CustomCommandConfig{
-		"view_diffs": {
-			Description: []string{"See the diffs of the local git repo"},
-			Command:     "git",
-			Args:        []string{"diff"},
+		"get_hostname": {
+			Description: []string{"See the hostname of the system that you are running on"},
+			Command:     "hostname",
+			Args:        []string{},
+		},
+		"ping_pong_unix": {
+			Description: []string{
+				"PingPong (only works on unix systems)",
+				"Must specify 'ping', will echo the value you specify back.",
+			},
+			Command: "bash",
+			Args: []string{
+				"-c",
+				"echo $ping",
+			},
+		},
+		"ping_pong_windows": {
+			Description: []string{
+				"PingPong (only works on windows systems)",
+				"Must specify 'ping', will echo the value you specify back.",
+			},
+			Command: "powershell",
+			Args: []string{
+				"-Command",
+				"echo $env:ping",
+			},
 		},
 	},
 }
