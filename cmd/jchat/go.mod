@@ -5,7 +5,7 @@ go 1.24.0
 toolchain go1.24.9
 
 require (
-	github.com/JoshPattman/agent v0.0.3
+	github.com/JoshPattman/agent v0.0.4
 	github.com/JoshPattman/agent/agentmcp v0.0.2
 	github.com/JoshPattman/jpf v0.8.2
 	github.com/charmbracelet/bubbletea v1.3.10
