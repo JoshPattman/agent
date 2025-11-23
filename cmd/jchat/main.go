@@ -97,13 +97,15 @@ var DefaultAgentsConfig = ai.AgentsConfig{
 				"An assistant that can assist with various AWS features",
 				"Primarily good at reading the documentation",
 			},
-			Personality:   "You are an AWS assistant",
-			Scenarios:     map[string]agent.Scenario{},
-			ModelName:     "default_model",
-			MCPServers:    []string{"aws_docs"},
-			SubAgents:     make([]string, 0),
-			ViewFiles:     false,
-			QuestionFiles: false,
+			Personality:    "You are an AWS assistant",
+			Scenarios:      map[string]agent.Scenario{},
+			ModelName:      "default_model",
+			MCPServers:     []string{"aws_docs"},
+			SubAgents:      make([]string, 0),
+			ViewFiles:      false,
+			QuestionFiles:  false,
+			RunCommands:    false,
+			CustomCommands: []string{},
 		},
 	},
 }
@@ -132,6 +134,16 @@ var DefaultMCPServersConfig = ai.MCPServersConfig{
 	},
 }
 
+var DefaultCustomCommandsConfig = ai.CustomCommandsConfig{
+	Commands: map[string]ai.CustomCommandConfig{
+		"view_diffs": {
+			Description: []string{"See the diffs of the local git repo"},
+			Command:     "git",
+			Args:        []string{"diff"},
+		},
+	},
+}
+
 func loadAndCreateAgentBuilder(activeAgentName string) (func() (agent.Agent, error), ui.AgentSummary, *jpf.UsageCounter, error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
@@ -141,6 +153,7 @@ func loadAndCreateAgentBuilder(activeAgentName string) (func() (agent.Agent, err
 	agentFileName := filepath.Join(dataPath, "agent.json")
 	modelsFileName := filepath.Join(dataPath, "models.json")
 	mcpFileName := filepath.Join(dataPath, "mcp.json")
+	commandsFileName := filepath.Join(dataPath, "commands.json")
 
 	// Load config files
 	modelsConf, err := loadJSONFileButCreateIfNotExist(modelsFileName, DefaultModelsConfig)
@@ -155,10 +168,14 @@ func loadAndCreateAgentBuilder(activeAgentName string) (func() (agent.Agent, err
 	if err != nil {
 		return nil, ui.AgentSummary{}, nil, err
 	}
+	commandsConf, err := loadJSONFileButCreateIfNotExist(commandsFileName, DefaultCustomCommandsConfig)
+	if err != nil {
+		return nil, ui.AgentSummary{}, nil, err
+	}
 
 	// Build the agent
 	usageCounter := jpf.NewUsageCounter()
-	builder, err := ai.BuildAgentBuilder(activeAgentName, modelsConf, agentConf, mcpsConf, usageCounter)
+	builder, err := ai.BuildAgentBuilder(activeAgentName, modelsConf, agentConf, mcpsConf, commandsConf, usageCounter)
 	if err != nil {
 		return nil, ui.AgentSummary{}, nil, err
 	}

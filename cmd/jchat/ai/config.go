@@ -27,6 +27,17 @@ type AgentConfig struct {
 	ViewFiles        bool                      `json:"view_files"`
 	QuestionFiles    bool                      `json:"question_files"`
 	RunCommands      bool                      `json:"run_commands"`
+	CustomCommands   []string                  `json:"custom_commands"`
+}
+
+type CustomCommandsConfig struct {
+	Commands map[string]CustomCommandConfig `json:"commands"`
+}
+
+type CustomCommandConfig struct {
+	Description []string `json:"description"`
+	Command     string   `json:"command"`
+	Args        []string `json:"args"`
 }
 
 type MCPServersConfig struct {

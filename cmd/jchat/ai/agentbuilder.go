@@ -10,7 +10,7 @@ import (
 	"github.com/JoshPattman/jpf"
 )
 
-func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsConf AgentsConfig, mcpsConf MCPServersConfig, usageCounter *jpf.UsageCounter) (func() agent.Agent, error) {
+func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsConf AgentsConfig, mcpsConf MCPServersConfig, commandsConf CustomCommandsConfig, usageCounter *jpf.UsageCounter) (func() agent.Agent, error) {
 	agentConf, ok := agentsConf.Agents[activeAgentName]
 	if !ok {
 		return nil, fmt.Errorf("could not find a configured agent called '%s'", activeAgentName)
@@ -61,12 +61,26 @@ func BuildAgentBuilder(activeAgentName string, modelsConf ModelsConfig, agentsCo
 
 	// Create agent-as-tool tools
 	for _, ac := range agentConf.SubAgents {
-		ab, err := BuildAgentBuilder(ac, modelsConf, agentsConf, mcpsConf, usageCounter)
+		ab, err := BuildAgentBuilder(ac, modelsConf, agentsConf, mcpsConf, commandsConf, usageCounter)
 		if err != nil {
 			return nil, err
 		}
 		subAgentConfig := agentsConf.Agents[ac] // This is safe to not check as we already checked above recursively
 		tools = append(tools, agent.NewAgentQuickQuestionTool(ab, ac, strings.Join(subAgentConfig.AgentDescription, ". ")))
+	}
+
+	// Create custom command tools
+	for _, ccID := range agentConf.CustomCommands {
+		ccConf, ok := commandsConf.Commands[ccID]
+		if !ok {
+			return nil, fmt.Errorf("could not find custom command '%s'", ccID)
+		}
+		tools = append(tools, agent.NewCustomExecuteCommandTool(
+			ccID,
+			ccConf.Description,
+			ccConf.Command,
+			ccConf.Args...,
+		))
 	}
 
 	// Build agent

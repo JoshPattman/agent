@@ -509,3 +509,42 @@ func NewExecuteCommandTool() Tool {
 		},
 	)
 }
+
+func NewCustomExecuteCommandTool(name string, description []string, commandPath string, commandArgs ...string) Tool {
+	return FunctionalTool(
+		func(m map[string]any) (string, error) {
+			workDirAny, ok := m["workdir"]
+			if !ok {
+				workDirAny = "."
+			}
+			workDir, ok := workDirAny.(string)
+			if !ok {
+				return "", errors.New("must specify 'workdir' as a string (or not specify)")
+			}
+			envVars := make(map[string]string)
+			for k, v := range envVars {
+				envVars[k] = fmt.Sprint(v)
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
+			defer cancel()
+			cmd := exec.CommandContext(ctx, commandPath, commandArgs...)
+			cmd.Dir = workDir
+			for k, v := range envVars {
+				cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", k, v))
+			}
+			resBuf := bytes.NewBuffer(nil)
+			cmd.Stdout = resBuf
+			cmd.Stderr = resBuf
+			err := cmd.Run()
+			if err != nil {
+				return "", err
+			}
+			return resBuf.String(), nil
+		},
+		name,
+		append(
+			description,
+			"You can also optionally specify a 'workdir' set set the working directory (default .).",
+		),
+	)
+}
