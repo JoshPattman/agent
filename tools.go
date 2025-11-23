@@ -522,7 +522,7 @@ func NewCustomExecuteCommandTool(name string, description []string, commandPath 
 				return "", errors.New("must specify 'workdir' as a string (or not specify)")
 			}
 			envVars := make(map[string]string)
-			for k, v := range envVars {
+			for k, v := range m {
 				envVars[k] = fmt.Sprint(v)
 			}
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*20)
@@ -537,7 +537,7 @@ func NewCustomExecuteCommandTool(name string, description []string, commandPath 
 			cmd.Stderr = resBuf
 			err := cmd.Run()
 			if err != nil {
-				return "", err
+				return "", errors.Join(err, errors.New(resBuf.String()))
 			}
 			return resBuf.String(), nil
 		},
