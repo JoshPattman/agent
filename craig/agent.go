@@ -22,25 +22,8 @@ func New(modelBuilder agent.AgentModelBuilder, opts ...NewOpt) agent.Agent {
 		params.tools = append(params.tools, agent.NewScenarioRetrieverTool(params.scenarios))
 	}
 	return &combineReActAgent{
-		reActStepper: newReActStepper(
-			params.personality,
-			modelBuilder,
-			params.tools,
-			params.systemPrompt,
-			params.taskPrefix,
-			params.finalAnswerMessage,
-			params.scenarios,
-		),
-		answerStepper: newAnswerStepper(
-			params.personality,
-			modelBuilder,
-			params.tools,
-			params.systemPrompt,
-			params.taskPrefix,
-			params.finalAnswerMessage,
-			params.scenarios,
-		),
-		tools: params.tools,
+		params:       *params,
+		modelBuilder: modelBuilder,
 	}
 }
 
@@ -93,18 +76,20 @@ func WithScenarios(scenarios map[string]agent.Scenario) NewOpt {
 
 type combineReActAgent struct {
 	history         []executedTask
-	reActStepper    reActStepper
-	answerStepper   responseStepper
-	tools           []agent.Tool
+	params          agentParams
+	modelBuilder    agent.AgentModelBuilder
 	onReActInit     func(string, []agent.Action)
 	onReActComplete func(string, []agent.ActionObservation)
+	onStreamBegin   func()
+	onStreamChunk   func(string)
 }
 
 func (a *combineReActAgent) Answer(query string) (string, error) {
+	reactStepper, answerStepper := a.buildSteppers()
 	state := newTaskState(query, a.history)
 	// Do reasoning and acting loop
 	for {
-		newState, ok, err := a.stepTaskState(state)
+		newState, ok, err := a.stepTaskState(reactStepper, state)
 		if err != nil {
 			return "", err
 		}
@@ -114,7 +99,7 @@ func (a *combineReActAgent) Answer(query string) (string, error) {
 		}
 	}
 	// Finalise output
-	finalResponse, _, err := a.answerStepper.Call(context.Background(), state)
+	finalResponse, _, err := answerStepper.Call(context.Background(), state)
 	if err != nil {
 		return "", err
 	}
@@ -126,6 +111,32 @@ func (a *combineReActAgent) Answer(query string) (string, error) {
 	return finalResponse.Response, nil
 }
 
+func (a *combineReActAgent) buildSteppers() (reActStepper, responseStepper) {
+	rs := newReActStepper(
+		a.params.personality,
+		a.modelBuilder,
+		a.params.tools,
+		a.params.systemPrompt,
+		a.params.taskPrefix,
+		a.params.finalAnswerMessage,
+		a.params.scenarios,
+		a.onStreamBegin,
+		a.onStreamChunk,
+	)
+	as := newAnswerStepper(
+		a.params.personality,
+		a.modelBuilder,
+		a.params.tools,
+		a.params.systemPrompt,
+		a.params.taskPrefix,
+		a.params.finalAnswerMessage,
+		a.params.scenarios,
+		a.onStreamBegin,
+		a.onStreamChunk,
+	)
+	return rs, as
+}
+
 func (a *combineReActAgent) SetOnReActInitCallback(callback func(reasoning string, actions []agent.Action)) {
 	a.onReActInit = callback
 }
@@ -133,8 +144,16 @@ func (a *combineReActAgent) SetOnReActCompleteCallback(callback func(reasoning s
 	a.onReActComplete = callback
 }
 
-func (a *combineReActAgent) stepTaskState(state executingState) (executingState, bool, error) {
-	resp, _, err := a.reActStepper.Call(context.Background(), state)
+func (a *combineReActAgent) SetOnBeginStreamAnswerCallback(callback func()) {
+	a.onStreamBegin = callback
+}
+
+func (a *combineReActAgent) SetOnStreamAnswerChunkCallback(callback func(string)) {
+	a.onStreamChunk = callback
+}
+
+func (a *combineReActAgent) stepTaskState(stepper reActStepper, state executingState) (executingState, bool, error) {
+	resp, _, err := stepper.Call(context.Background(), state)
 	if err != nil {
 		return executingState{}, false, err
 	}
@@ -165,7 +184,7 @@ func (a *combineReActAgent) observeActions(actions []agent.Action) []agent.Actio
 		go func(i int, action agent.Action) {
 			defer wg.Done()
 			var tool agent.Tool
-			for _, t := range a.tools {
+			for _, t := range a.params.tools {
 				if t.Name() == action.Name {
 					tool = t
 					break

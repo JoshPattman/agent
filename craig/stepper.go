@@ -18,7 +18,17 @@ var defaultSystemPrompt string
 var defaultReActModePrefix = "You are now in reason-action mode. Your next task / query to respond to is as follows:\n"
 var defaultAnswerModeContent = "You are now in final answer mode, create your final answer."
 
-func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string, scenarios map[string]agent.Scenario) reActStepper {
+func newReActStepper(
+	personality string,
+	modelBuilder agent.AgentModelBuilder,
+	tools []agent.Tool,
+	systemPrompt string,
+	taskPrefix string,
+	answerModeContent string,
+	scenarios map[string]agent.Scenario,
+	onInitFinalStream func(),
+	onChunkFinalStream func(string),
+) reActStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
 			personality,
@@ -30,11 +40,21 @@ func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, t
 			scenarios,
 		},
 		jpf.NewJsonResponseDecoder[executingState, reActResponse](), //jpf.NewValidatingResponseDecoder(, func(resp reActResponse) error { return fmt.Errorf("%v", resp) }),
-		modelBuilder.BuildAgentModel(reActResponse{}),
+		modelBuilder.BuildAgentModel(reActResponse{}, onInitFinalStream, onChunkFinalStream),
 	)
 }
 
-func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, tools []agent.Tool, systemPrompt string, taskPrefix string, answerModeContent string, scenarios map[string]agent.Scenario) responseStepper {
+func newAnswerStepper(
+	personality string,
+	modelBuilder agent.AgentModelBuilder,
+	tools []agent.Tool,
+	systemPrompt string,
+	taskPrefix string,
+	answerModeContent string,
+	scenarios map[string]agent.Scenario,
+	onInitFinalStream func(),
+	onChunkFinalStream func(string),
+) responseStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
 			personality,
@@ -46,6 +66,6 @@ func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, 
 			scenarios,
 		},
 		jpf.NewJsonResponseDecoder[executingState, answerResponse](),
-		modelBuilder.BuildAgentModel(answerResponse{}),
+		modelBuilder.BuildAgentModel(answerResponse{}, onInitFinalStream, onChunkFinalStream),
 	)
 }
