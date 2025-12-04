@@ -1,6 +1,7 @@
 package ai
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"io"
@@ -71,7 +72,7 @@ func (b *batchFileQA) Call(args map[string]any) (string, error) {
 	for i, content := range contents {
 		go func() {
 			defer wg.Done()
-			res, _, err := mf.Call(fileQAInput{content, query})
+			res, _, err := mf.Call(context.Background(), fileQAInput{content, query})
 			if err != nil {
 				errs[i] = err
 			} else {
@@ -90,7 +91,7 @@ func (b *batchFileQA) Call(args map[string]any) (string, error) {
 func (b *batchFileQA) buildMF() jpf.MapFunc[fileQAInput, string] {
 	return jpf.NewOneShotMapFunc(
 		jpf.NewTemplateMessageEncoder[fileQAInput]("", "Document:\n{{ .Content }}\n\n\nQuery: {{ .Query }}"),
-		jpf.NewRawStringResponseDecoder(),
+		jpf.NewRawStringResponseDecoder[fileQAInput](),
 		b.builder.BuildFileQAModel(),
 	)
 }

@@ -29,7 +29,7 @@ func newReActStepper(personality string, modelBuilder agent.AgentModelBuilder, t
 			tools,
 			scenarios,
 		},
-		jpf.NewJsonResponseDecoder[reActResponse](), //jpf.NewValidatingResponseDecoder(, func(resp reActResponse) error { return fmt.Errorf("%v", resp) }),
+		jpf.NewJsonResponseDecoder[executingState, reActResponse](), //jpf.NewValidatingResponseDecoder(, func(resp reActResponse) error { return fmt.Errorf("%v", resp) }),
 		modelBuilder.BuildAgentModel(reActResponse{}),
 	)
 }
@@ -45,7 +45,7 @@ func newAnswerStepper(personality string, modelBuilder agent.AgentModelBuilder, 
 			tools,
 			scenarios,
 		},
-		jpf.NewJsonResponseDecoder[answerResponse](),
+		jpf.NewJsonResponseDecoder[executingState, answerResponse](),
 		modelBuilder.BuildAgentModel(answerResponse{}),
 	)
 }

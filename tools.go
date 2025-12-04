@@ -38,7 +38,7 @@ func (m *mapFuncTool[T]) Call(args map[string]any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	result, _, err := m.mf.Call(typedArgs)
+	result, _, err := m.mf.Call(context.Background(), typedArgs)
 	return result, err
 }
 

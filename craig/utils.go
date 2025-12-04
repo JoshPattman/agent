@@ -28,7 +28,7 @@ func FormatActionArgsForDisplay(args []agent.ActionArg) string {
 
 	parts := make([]string, len(args))
 	for i, arg := range args {
-		parts[i] = fmt.Sprintf("%s=%6.6s", arg.ArgName, fmt.Sprint(arg.ArgData))
+		parts[i] = fmt.Sprintf("%s=%20.20s", arg.ArgName, fmt.Sprint(arg.ArgData))
 	}
 
 	return strings.Join(parts, "&")

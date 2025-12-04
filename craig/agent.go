@@ -2,6 +2,7 @@
 package craig
 
 import (
+	"context"
 	"fmt"
 	"sync"
 
@@ -113,7 +114,7 @@ func (a *combineReActAgent) Answer(query string) (string, error) {
 		}
 	}
 	// Finalise output
-	finalResponse, _, err := a.answerStepper.Call(state)
+	finalResponse, _, err := a.answerStepper.Call(context.Background(), state)
 	if err != nil {
 		return "", err
 	}
@@ -133,7 +134,7 @@ func (a *combineReActAgent) SetOnReActCompleteCallback(callback func(reasoning s
 }
 
 func (a *combineReActAgent) stepTaskState(state executingState) (executingState, bool, error) {
-	resp, _, err := a.reActStepper.Call(state)
+	resp, _, err := a.reActStepper.Call(context.Background(), state)
 	if err != nil {
 		return executingState{}, false, err
 	}
