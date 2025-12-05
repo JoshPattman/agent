@@ -5,9 +5,9 @@ go 1.24.0
 toolchain go1.24.9
 
 require (
-	github.com/JoshPattman/agent v0.0.4
+	github.com/JoshPattman/agent v0.0.5
 	github.com/JoshPattman/agent/agentmcp v0.0.2
-	github.com/JoshPattman/jpf v0.8.2
+	github.com/JoshPattman/jpf v0.9.0-beta.4
 	github.com/charmbracelet/bubbletea v1.3.10
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
@@ -41,5 +41,6 @@ require (
 	github.com/yosida95/uritemplate/v3 v3.0.2 // indirect
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
+	golang.org/x/time v0.14.0 // indirect
 	gopkg.in/yaml.v3 v3.0.1 // indirect
 )
