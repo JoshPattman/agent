@@ -13,7 +13,7 @@ A simple and flexible ReAct (Reasoning and Acting) agent for Go. This library im
 
 ## Instalation
 - For the agent package (for developers): `go get github.com/JoshPattman/agent`
-- For the agent TUI (interactive way to interact with an agent): `go install github.com/JoshPattman/agent/cmd/jchat@latest`
+- For the agent TUI (interactive way to chat with an agent): `go install github.com/JoshPattman/agent/cmd/jchat@latest`
 
 ## Quick Start
 
