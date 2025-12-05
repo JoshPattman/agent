@@ -106,9 +106,9 @@ func (a *combineReActAgent) Answer(query string) (string, error) {
 	a.history = append(a.history, executedTask{
 		Task:     query,
 		Steps:    state.Active.Steps,
-		Response: finalResponse.Response,
+		Response: finalResponse,
 	})
-	return finalResponse.Response, nil
+	return finalResponse, nil
 }
 
 func (a *combineReActAgent) buildSteppers() (reActStepper, responseStepper) {
@@ -120,8 +120,6 @@ func (a *combineReActAgent) buildSteppers() (reActStepper, responseStepper) {
 		a.params.taskPrefix,
 		a.params.finalAnswerMessage,
 		a.params.scenarios,
-		a.onStreamBegin,
-		a.onStreamChunk,
 	)
 	as := newAnswerStepper(
 		a.params.personality,

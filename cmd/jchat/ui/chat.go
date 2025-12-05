@@ -16,11 +16,12 @@ func NewChat() tea.Model {
 }
 
 type chat struct {
-	messages     []tea.Model
-	height       int
-	width        int
-	scrollOffset int
-	info         string
+	messages                []tea.Model
+	height                  int
+	width                   int
+	scrollOffset            int
+	info                    string
+	lastMessageWasReasoning bool
 }
 
 func (m chat) Init() tea.Cmd {
@@ -50,13 +51,37 @@ func (m chat) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.height = msg.Height
 		return m, nil
 	case AddMessage:
-		newMessage := Message{
-			msg.Type,
-			msg.Content,
-			m.width,
+		if msg.Type == CRAIGPartialMessage {
+			if m.lastMessageWasReasoning {
+				m.lastMessageWasReasoning = true
+				lastIdx := len(m.messages) - 1
+				lastMsg, _ := m.messages[lastIdx].Update(AppendMessageText{ExtraText: msg.Content})
+				m.messages[lastIdx] = lastMsg
+				return m, nil
+			} else {
+				m.lastMessageWasReasoning = true
+				newMessage := Message{
+					CRAIGMessage,
+					msg.Content,
+					m.width,
+				}
+				m.messages = append(m.messages, newMessage)
+				return m, nil
+			}
+		} else {
+			if m.lastMessageWasReasoning {
+				m.lastMessageWasReasoning = false
+				m.messages = m.messages[:len(m.messages)-1]
+			}
+			newMessage := Message{
+				msg.Type,
+				msg.Content,
+				m.width,
+			}
+			m.messages = append(m.messages, newMessage)
+			m.lastMessageWasReasoning = false
+			return m, nil
 		}
-		m.messages = append(m.messages, newMessage)
-		return m, nil
 	case SetChatInfoMessage:
 		m.info = msg.Message
 		return m, nil

@@ -10,6 +10,7 @@ type MessageType int
 const (
 	UserMessage MessageType = iota
 	CRAIGMessage
+	CRAIGPartialMessage
 	CRAIGReasoningMessage
 	ErrorMessage
 )
@@ -28,6 +29,9 @@ func (m Message) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case SetWidth:
 		m.width = msg.Width
+		return m, nil
+	case AppendMessageText:
+		m.content += msg.ExtraText
 		return m, nil
 	default:
 		return m, nil

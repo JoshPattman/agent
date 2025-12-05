@@ -17,12 +17,7 @@ type ModelBuilder struct {
 }
 
 func (b *ModelBuilder) BuildAgentModel(responseType any, onFinalStreamBegin func(), onFinalStreamChunk func(string)) jpf.Model {
-	rformat, err := getSchema(responseType)
-	if err != nil {
-		panic(err)
-	}
 	opts := []jpf.OpenAIModelOpt{
-		jpf.WithJsonSchema{X: rformat},
 		jpf.WithURL{X: b.URL},
 	}
 	if b.Headers != nil {
@@ -30,7 +25,14 @@ func (b *ModelBuilder) BuildAgentModel(responseType any, onFinalStreamBegin func
 			opts = append(opts, jpf.WithHTTPHeader{K: k, V: v})
 		}
 	}
-	if onFinalStreamBegin != nil && onFinalStreamChunk != nil {
+	if responseType != nil {
+		rformat, err := getSchema(responseType)
+		if err != nil {
+			panic(err)
+		}
+		opts = append(opts, jpf.WithJsonSchema{X: rformat})
+	}
+	if onFinalStreamBegin != nil || onFinalStreamChunk != nil {
 		opts = append(
 			opts,
 			jpf.WithStreamResponse{

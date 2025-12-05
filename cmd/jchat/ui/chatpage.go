@@ -32,6 +32,7 @@ func NewChatPage(buildAgent func() (agent.Agent, error), summary AgentSummary) t
 		nil,
 		NewSummary(summary),
 		false,
+		make(chan string),
 	}
 	cp.textInput, _ = cp.textInput.Update(SetTextboxCompleteMessage{
 		func(s string) tea.Msg {
@@ -52,14 +53,20 @@ type chatPage struct {
 	sendConcMsg         func(tea.Msg)
 	summary             tea.Model
 	awaitingResponse    bool
+	streamChunkReady    chan string
 }
 
-func (chatPage) Init() tea.Cmd {
+func (m chatPage) Init() tea.Cmd {
 	return tea.Batch(
 		func() tea.Msg {
 			return ResetAgentMessage{}
 		},
+		m.onStreamRecvCmd,
 	)
+}
+
+func (m chatPage) onStreamRecvCmd() tea.Msg {
+	return AIMessageSend{Unfinished: true, Message: <-m.streamChunkReady}
 }
 
 func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
@@ -99,7 +106,7 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			if err != nil {
 				return AIErrorSend{err}
 			}
-			return AIMessageSend{result}
+			return AIMessageSend{Message: result}
 		}
 		cmdDots := func() tea.Msg {
 			return SetThinkingNumDots{1}
@@ -107,6 +114,10 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.chat, _ = m.chat.Update(SetChatInfoMessage{"Thinking..."})
 		return m, tea.Batch(cmd, cmdDots)
 	case AIMessageSend:
+		if msg.Unfinished {
+			m.chat, _ = m.chat.Update(AddMessage{CRAIGPartialMessage, msg.Message})
+			return m, m.onStreamRecvCmd
+		}
 		m.chat, _ = m.chat.Update(AddMessage{CRAIGMessage, msg.Message})
 		m.textInput, _ = m.textInput.Update(EnableMessage{true})
 		return m, nil
@@ -140,6 +151,9 @@ func (m chatPage) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			cmd := func() tea.Msg { return AIErrorSend{err} }
 			return m, cmd
 		}
+		newAgent.SetOnStreamAnswerChunkCallback(func(s string) {
+			m.streamChunkReady <- s
+		})
 		sendConcMsg := m.sendConcMsg
 		newAgent.SetOnReActCompleteCallback(func(s string, ao []agent.ActionObservation) {
 			toolCalls := make([]string, len(ao))

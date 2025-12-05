@@ -26,6 +26,10 @@ type AddMessage struct {
 	Content string
 }
 
+type AppendMessageText struct {
+	ExtraText string
+}
+
 type ResetMessages struct{}
 
 type EnableMessage struct {
@@ -41,7 +45,8 @@ type UserMessageSend struct {
 }
 
 type AIMessageSend struct {
-	Message string
+	Unfinished bool
+	Message    string
 }
 
 type AIReasoningSend struct {

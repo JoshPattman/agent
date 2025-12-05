@@ -11,7 +11,7 @@ import (
 type reActStepper jpf.MapFunc[executingState, reActResponse]
 
 // Given a state, create the final response.
-type responseStepper jpf.MapFunc[executingState, answerResponse]
+type responseStepper jpf.MapFunc[executingState, string]
 
 //go:embed system.gtpl
 var defaultSystemPrompt string
@@ -26,8 +26,6 @@ func newReActStepper(
 	taskPrefix string,
 	answerModeContent string,
 	scenarios map[string]agent.Scenario,
-	onInitFinalStream func(),
-	onChunkFinalStream func(string),
 ) reActStepper {
 	return jpf.NewOneShotMapFunc(
 		&stateHistoryMessageEncoder{
@@ -40,7 +38,7 @@ func newReActStepper(
 			scenarios,
 		},
 		jpf.NewJsonResponseDecoder[executingState, reActResponse](), //jpf.NewValidatingResponseDecoder(, func(resp reActResponse) error { return fmt.Errorf("%v", resp) }),
-		modelBuilder.BuildAgentModel(reActResponse{}, onInitFinalStream, onChunkFinalStream),
+		modelBuilder.BuildAgentModel(reActResponse{}, nil, nil),
 	)
 }
 
@@ -65,7 +63,7 @@ func newAnswerStepper(
 			tools,
 			scenarios,
 		},
-		jpf.NewJsonResponseDecoder[executingState, answerResponse](),
-		modelBuilder.BuildAgentModel(answerResponse{}, onInitFinalStream, onChunkFinalStream),
+		jpf.NewRawStringResponseDecoder[executingState](),
+		modelBuilder.BuildAgentModel(nil, onInitFinalStream, onChunkFinalStream),
 	)
 }
