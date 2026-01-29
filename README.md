@@ -1,3 +1,5 @@
+> For a better agent framework, take a look at [react](github.com/JoshPattman/react)
+
 # Agent
 
 A simple and flexible ReAct (Reasoning and Acting) agent for Go. This library implements the ReAct pattern, allowing AI agents to reason about problems and take actions using tools to solve complex tasks.
