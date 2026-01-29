@@ -1,4 +1,4 @@
-> For a better agent framework, take a look at [react](github.com/JoshPattman/react)
+> For a better agent framework, take a look at [react](https://github.com/JoshPattman/react)
 
 # Agent
 
